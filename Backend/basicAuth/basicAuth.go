@@ -13,7 +13,7 @@ func checkUserValid(user, pswd string) bool {
 func Wrapper(handler http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user, pswd, ok := r.BasicAuth()
-		if ok && checkUserValid(user, pswd) {
+		if ok && Authenticator.Authenticate(user, pswd) {
 			handler(w, r)
 		} else {
 			w.Header().Set("WWW-Authenticate",

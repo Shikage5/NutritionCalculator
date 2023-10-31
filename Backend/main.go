@@ -1,7 +1,7 @@
 package main
 
 import (
-	"NutritionCalculator/basicAuth"
+	"NutritionCalculator/handlers"
 	"log"
 	"net/http"
 )
@@ -13,7 +13,11 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", basicAuth.Wrapper(mainHandler))
 
+	http.HandleFunc("/", handlers.IndexHandler)
+	http.HandleFunc("/login", handlers.LoginHandler)
+	http.HandleFunc("/register", handlers.RegisterHandler)
+
+	log.Println("Server is running on :8080...")
 	log.Fatalln(http.ListenAndServe(":8080", nil))
 }
