@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"NutritionCalculator/models"
+	"NutritionCalculator/pkg/models"
 	"html/template"
 	"net/http"
 

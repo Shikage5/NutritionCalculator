@@ -1,7 +1,7 @@
 package main
 
 import (
-	"NutritionCalculator/handlers"
+	"NutritionCalculator/pkg/handlers"
 	"log"
 	"net/http"
 )
