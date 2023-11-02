@@ -12,5 +12,5 @@ func greet(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	http.HandleFunc("/", greet)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServeTLS(":443", "server.crt", "server.key", nil)
 }
