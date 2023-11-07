@@ -1,11 +1,27 @@
 package models
 
 import (
+	"encoding/json"
 	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
+
+var mockUsers = []User{
+	{
+		Username:     "user1",
+		PasswordHash: "passwordHash1",
+	},
+	{
+		Username:     "user2",
+		PasswordHash: "passwordHash2",
+	},
+	{
+		Username:     "user3",
+		PasswordHash: "passwordHash3",
+	},
+}
 
 func TestReadUsersFromJSONFile(t *testing.T) {
 	testCases := []struct {
@@ -48,6 +64,59 @@ func TestReadUsersFromJSONFile(t *testing.T) {
 			}
 
 			assert.Equal(t, tc.expected, users, "Unexpected users")
+		})
+	}
+}
+
+func TestWriteUserInJSONFile(t *testing.T) {
+	testCases := []struct {
+		desc     string
+		input    User
+		hasError bool
+	}{
+		{
+			desc:     "User added correctly",
+			input:    User{Username: "newUser", PasswordHash: "newPasswordHash"},
+			hasError: false,
+		},
+		{
+			desc:     "Username already exists",
+			input:    User{Username: "user1", PasswordHash: "newPasswordHash"},
+			hasError: true,
+		},
+		{
+			desc:     "Empty Username",
+			input:    User{Username: "", PasswordHash: "newPasswordHash"},
+			hasError: true,
+		},
+		{
+			desc:     "Empty Password",
+			input:    User{Username: "newUser", PasswordHash: ""},
+			hasError: true,
+		},
+		{
+			desc:     "Empty Input",
+			input:    User{Username: "", PasswordHash: ""},
+			hasError: true,
+		},
+	}
+	for _, tC := range testCases {
+		t.Run(tC.desc, func(t *testing.T) {
+			//mockUsers to JSON
+			usersJSON, err := json.Marshal(mockUsers)
+			if err != nil {
+				t.Fatal(err)
+			}
+			tempFile := createTempTestJSONFile(t, string(usersJSON))
+			writeErr := WriteUserInJSONFile(tC.input, tempFile)
+
+			if tC.hasError {
+				// Expecting an error, so check if err is not nil
+				assert.Error(t, writeErr, "Expected an error")
+			} else {
+				// Not expecting an error, so check if err is nil
+				assert.NoError(t, writeErr, "Expected no error")
+			}
 		})
 	}
 }
