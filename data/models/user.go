@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-
-	"golang.org/x/crypto/bcrypt"
 )
 
 type User struct {
@@ -20,8 +18,14 @@ func ReadUsersFromJSONFile(filename string) ([]User, error) {
 	}
 
 	var users []User
-	if err := json.Unmarshal(data, &users); err != nil {
-		return nil, err
+
+	if len(data) == 0 {
+		// The JSON file is empty, so initialize 'users' as an empty slice
+		users = []User{}
+	} else {
+		if err := json.Unmarshal(data, &users); err != nil {
+			return nil, err
+		}
 	}
 
 	return users, nil
@@ -33,12 +37,6 @@ func WriteUserInJSONFile(newUser User, filename string) error {
 		return errors.New("username and password cannot be empty")
 	}
 
-	// Hash the password before saving it
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newUser.PasswordHash), bcrypt.DefaultCost)
-	if err != nil {
-		return err
-	}
-	newUser.PasswordHash = string(hashedPassword)
 	// Read existing users from the file
 	existingUsers, err := ReadUsersFromJSONFile(filename)
 	if err != nil {

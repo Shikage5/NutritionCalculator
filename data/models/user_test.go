@@ -39,8 +39,8 @@ func TestReadUsersFromJSONFile(t *testing.T) {
 		{
 			name:     "Empty File",
 			input:    "",
-			expected: nil,
-			hasError: true,
+			expected: []User{},
+			hasError: false,
 		},
 		{
 			name:     "Invalid JSON",
