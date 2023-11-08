@@ -14,6 +14,6 @@ func greet(w http.ResponseWriter, r *http.Request) {
 func main() {
 
 	http.HandleFunc("/", greet)
-	http.HandleFunc("/register", pagelogin.RegisterHandle)
+	http.HandleFunc("/register", pagelogin.RegisterHandler)
 	http.ListenAndServeTLS(":443", "server.crt", "server.key", nil)
 }
