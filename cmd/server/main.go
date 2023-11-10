@@ -1,7 +1,7 @@
-package main
+package server
 
 import (
-	pagelogin "NutritionCalculator/pkg/handlers/pageLogin"
+	pagelogin "NutritionCalculator/pkg/handlers/registration"
 	"fmt"
 	"net/http"
 	"time"

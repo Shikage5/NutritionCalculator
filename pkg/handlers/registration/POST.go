@@ -1,17 +1,12 @@
-package pagelogin
+package registration
 
 import (
 	"NutritionCalculator/data/models"
-	"NutritionCalculator/pkg/auth"
+	"NutritionCalculator/pkg/services/hashing"
 	"net/http"
 )
 
-func RegisterHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != http.MethodPost {
-		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-		return
-	}
-
+func RegisterPOSTHandler(w http.ResponseWriter, r *http.Request) {
 	// Parse the form data from the HTTP request
 	err := r.ParseForm()
 	if err != nil {
@@ -21,7 +16,7 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Extract user input from the form
 	username := r.FormValue("username")
-	hashedPassword, err := auth.HashPassword(r.FormValue("password"))
+	hashedPassword, err := hashing.HashPassword(r.FormValue("password"))
 	if err != nil {
 		http.Error(w, "Failed to hash the password", http.StatusInternalServerError)
 		return
