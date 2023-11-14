@@ -15,6 +15,7 @@ type DefaultRegistrationService struct{}
 
 // RegisterUser implements the registration logic.
 func (s *DefaultRegistrationService) RegisterUser(username, password string, filename string) error {
+
 	hashedPassword, err := hashing.HashPassword(password)
 	if err != nil {
 		return err

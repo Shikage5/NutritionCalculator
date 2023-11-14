@@ -26,22 +26,22 @@ var mockUsers = []models.User{
 
 func TestRegisterUser(t *testing.T) {
 	testCases := []struct {
-		desc        string
-		username    string
-		password    string
-		expectedErr bool
+		desc     string
+		username string
+		password string
+		hasError bool
 	}{
 		{
-			desc:        "Successful registration",
-			username:    "testuser",
-			password:    "testpass",
-			expectedErr: false,
+			desc:     "Successful registration",
+			username: "testuser",
+			password: "testpass",
+			hasError: false,
 		},
 		{
-			desc:        "Failed password hashing",
-			username:    "testuser",
-			password:    "", // invalid password to trigger hashing error
-			expectedErr: true,
+			desc:     "Failed password hashing",
+			username: "testuser",
+			password: "", // invalid password to trigger hashing error
+			hasError: true,
 		},
 	}
 	for _, tC := range testCases {
@@ -59,14 +59,14 @@ func TestRegisterUser(t *testing.T) {
 			// Call the RegisterUser function with the test case input
 			registerErr := service.RegisterUser(tC.username, tC.password, tempFile)
 
-			if tC.expectedErr {
+			if tC.hasError {
 				assert.Error(t, registerErr, "Expected an error")
 			} else {
 				assert.NoError(t, registerErr, "Unexpected error")
 			}
 
 			// If no error is expected, you may perform additional assertions
-			if !tC.expectedErr {
+			if !tC.hasError {
 				// Add additional assertions as needed
 			}
 		})
