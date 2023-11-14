@@ -1,12 +1,11 @@
-package registration
+package registrationHandlers
 
 import (
-	"NutritionCalculator/data/models"
-	"NutritionCalculator/pkg/services/hashing"
+	"NutritionCalculator/pkg/services/registration"
 	"net/http"
 )
 
-func RegisterPOSTHandler(w http.ResponseWriter, r *http.Request) {
+func RegisterPOSTHandler(w http.ResponseWriter, r *http.Request, registrationService registration.RegistrationService) {
 	// Parse the form data from the HTTP request
 	err := r.ParseForm()
 	if err != nil {
@@ -16,19 +15,10 @@ func RegisterPOSTHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Extract user input from the form
 	username := r.FormValue("username")
-	hashedPassword, err := hashing.HashPassword(r.FormValue("password"))
-	if err != nil {
-		http.Error(w, "Failed to hash the password", http.StatusInternalServerError)
-		return
-	}
-	user := models.User{
-		Username:     username,
-		PasswordHash: hashedPassword,
-	}
+	password := r.FormValue("password")
 
-	// Write the user to the "data/users.json" file
-	err = models.WriteUserInJSONFile(user, "data/users.json")
-	if err != nil {
+	// Call the function to register the user
+	if err := registrationService.RegisterUser(username, password); err != nil {
 		http.Error(w, "Failed to register user: "+err.Error(), http.StatusInternalServerError)
 		return
 	}

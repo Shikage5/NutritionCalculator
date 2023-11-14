@@ -1,6 +1,7 @@
 package models
 
 import (
+	"NutritionCalculator/utils"
 	"encoding/json"
 	"os"
 	"testing"
@@ -52,7 +53,7 @@ func TestReadUsersFromJSONFile(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			tempFile := createTempTestJSONFile(t, tc.input)
+			tempFile := utils.CreateTempTestJSONFile(t, tc.input)
 			defer os.Remove(tempFile)
 
 			users, err := ReadUsersFromJSONFile(tempFile)
@@ -107,7 +108,7 @@ func TestWriteUserInJSONFile(t *testing.T) {
 			if err != nil {
 				t.Fatal(err)
 			}
-			tempFile := createTempTestJSONFile(t, string(usersJSON))
+			tempFile := utils.CreateTempTestJSONFile(t, string(usersJSON))
 			writeErr := WriteUserInJSONFile(tC.input, tempFile)
 
 			if tC.hasError {
@@ -119,18 +120,4 @@ func TestWriteUserInJSONFile(t *testing.T) {
 			}
 		})
 	}
-}
-
-// Helper function to create a temporary test JSON file
-func createTempTestJSONFile(t *testing.T, content string) string {
-	tempFile, err := os.CreateTemp("", "test_users.json")
-	if err != nil {
-		t.Fatal(err)
-	}
-	_, err = tempFile.WriteString(content)
-	if err != nil {
-		t.Fatal(err)
-	}
-	tempFile.Close()
-	return tempFile.Name()
 }

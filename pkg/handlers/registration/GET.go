@@ -1,4 +1,4 @@
-package registration
+package registrationHandlers
 
 import (
 	"net/http"

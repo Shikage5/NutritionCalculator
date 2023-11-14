@@ -1,7 +1,6 @@
-package registration
+package registrationHandlers
 
 import (
-	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -15,34 +14,22 @@ func TestRegisterHandler(t *testing.T) {
 		method         string
 		expectedStatus int
 	}{
-		{"GET request", http.MethodGet, http.StatusOK},
-		{"POST request", http.MethodPost, http.StatusOK},
-		{"Unsupported method", http.MethodPut, http.StatusMethodNotAllowed},
+		{"Valid GET Request", http.MethodGet, http.StatusOK},
+		{"Valid POST Request", http.MethodPost, http.StatusOK},
+		{"Invalid Method", http.MethodPut, http.StatusMethodNotAllowed},
 	}
-
-	// Create a test server
-	server := httptest.NewServer(http.HandlerFunc(RegisterHandler))
-	defer server.Close()
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			var resp *http.Response
-			var err error
+			req, err := http.NewRequest(tc.method, "/test", nil)
+			assert.NoError(t, err, "Failed to create request")
 
-			switch tc.method {
-			case http.MethodGet:
-				resp, err = http.Get(server.URL)
-			case http.MethodPost:
-				// Provide a request body for the POST request
-				req, _ := http.NewRequest(tc.method, server.URL, bytes.NewBuffer([]byte("some content")))
-				resp, err = http.DefaultClient.Do(req)
-			default:
-				req, _ := http.NewRequest(tc.method, server.URL, nil)
-				resp, err = http.DefaultClient.Do(req)
-			}
+			recorder := httptest.NewRecorder()
+			RegisterHandler(recorder, req)
 
-			assert.NoError(t, err)
-			assert.Equal(t, tc.expectedStatus, resp.StatusCode)
+			assert.Equal(t, tc.expectedStatus, recorder.Code, "Unexpected status code")
+
+			// You can add more assertions if needed based on your specific requirements.
 		})
 	}
 }
