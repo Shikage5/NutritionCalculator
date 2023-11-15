@@ -1,43 +1,72 @@
-package middleware
+package middleware_test
 
 import (
+	"NutritionCalculator/pkg/middleware"
+	"NutritionCalculator/pkg/services/validation"
 	"net/http"
-	"strings"
+	"net/http/httptest"
+	"net/url"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
-func testHandler(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
-}
 func TestValidateUser(t *testing.T) {
+	validator := validation.NewCredentialsValidator()
 	testCases := []struct {
-		desc        string
-		requestBody string
-		hasError    bool
+		desc     string
+		username string
+		password string
+		status   int
 	}{
 		{
-			desc:        "Valid Request",
-			requestBody: `{"username": "john", "password": "secretpassword"}`,
-			hasError:    false,
+			desc:     "Valid Request",
+			username: "john",
+			password: "secretpassword",
+			status:   http.StatusOK,
 		},
 		{
-			desc:        "Username field empty",
-			requestBody: `{"username": "", "password": "secretpassword"}`,
-			hasError:    true,
+			desc:     "Username field empty",
+			username: "",
+			password: "secretpassword",
+			status:   http.StatusBadRequest,
 		},
 		{
-			desc:        "Password field empty",
-			requestBody: `{"username": "john", "password": ""}`,
-			hasError:    true,
+			desc:     "Password field empty",
+			username: "john",
+			password: "",
+			status:   http.StatusBadRequest,
+		},
+		{
+			desc:     "EmptyCredentials",
+			username: "",
+			password: "",
+			status:   http.StatusBadRequest,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			req, err := http.NewRequest("POST", "/register", strings.NewReader(tC.requestBody))
-			assert.NoError(t, err)
+			form := url.Values{}
+			form.Set("username", tC.username)
+			form.Set("password", tC.password)
 
+			req, err := http.NewRequest("POST", "/some-endpoint", nil)
+			assert.NoError(t, err)
+			req.Form = form
+
+			// Create a response recorder to capture the response
+			recorder := httptest.NewRecorder()
+
+			// Create an http.Handler that includes the middleware
+			handler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(http.StatusOK)
+			})
+			middleware := middleware.ValidateUser(validator, handler)
+			// Serve the request through the middleware
+			middleware.ServeHTTP(recorder, req)
+
+			// Check if the status code matches the expected result
+			assert.Equal(t, tC.status, recorder.Code)
 		})
 	}
 }
