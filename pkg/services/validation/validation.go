@@ -1,14 +1,20 @@
+// validation.go
 package validation
 
-// CredentialsValidator is a service that provides validation for username and password.
-type CredentialsValidator struct{}
+// CredentialsValidator is an interface for validation of username and password.
+type CredentialsValidator interface {
+	ValidateCredentials(username, password string) bool
+}
 
-// NewCredentialsValidator creates a new instance of CredentialsValidator.
-func NewCredentialsValidator() *CredentialsValidator {
-	return &CredentialsValidator{}
+// DefaultCredentialsValidator is a default implementation of CredentialsValidator.
+type DefaultCredentialsValidator struct{}
+
+// NewCredentialsValidator creates a new instance of DefaultCredentialsValidator.
+func NewCredentialsValidator() *DefaultCredentialsValidator {
+	return &DefaultCredentialsValidator{}
 }
 
 // ValidateCredentials checks if the username and password are not empty.
-func (v *CredentialsValidator) ValidateCredentials(username, password string) bool {
+func (v *DefaultCredentialsValidator) ValidateCredentials(username, password string) bool {
 	return username != "" && password != ""
 }

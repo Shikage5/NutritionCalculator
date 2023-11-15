@@ -18,3 +18,10 @@ func CreateTempTestJSONFile(t *testing.T, content string) string {
 	tempFile.Close()
 	return tempFile.Name()
 }
+
+func RemoveTempTestJSONFile(t *testing.T, filename string) {
+	err := os.Remove(filename)
+	if err != nil {
+		t.Errorf("Error removing temporary test file: %v", err)
+	}
+}

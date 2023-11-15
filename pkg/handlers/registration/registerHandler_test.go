@@ -27,6 +27,7 @@ func TestRegisterHandler(t *testing.T) {
 			recorder := httptest.NewRecorder()
 			RegisterHandler(recorder, req)
 
+			// Assert the status code
 			assert.Equal(t, tc.expectedStatus, recorder.Code, "Unexpected status code")
 
 			// You can add more assertions if needed based on your specific requirements.

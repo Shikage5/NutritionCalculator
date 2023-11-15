@@ -7,11 +7,15 @@ import (
 
 // RegistrationService defines the interface for user registration.
 type RegistrationService interface {
-	RegisterUser(username, password string) error
+	RegisterUser(username, password string, filename string) error
 }
 
 // DefaultRegistrationService is the default implementation of RegistrationService.
 type DefaultRegistrationService struct{}
+
+func NewRegistrationService() *DefaultRegistrationService {
+	return &DefaultRegistrationService{}
+}
 
 // RegisterUser implements the registration logic.
 func (s *DefaultRegistrationService) RegisterUser(username, password string, filename string) error {

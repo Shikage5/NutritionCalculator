@@ -52,15 +52,22 @@ func TestRegisterUser(t *testing.T) {
 			}
 
 			tempFile := utils.CreateTempTestJSONFile(t, string(usersJSON))
-			// Create an instance of DefaultRegistrationService
+			defer utils.RemoveTempTestJSONFile(t, tempFile)
 
-			service := &DefaultRegistrationService{}
+			// Mocked hashing service for injecting hashing failure in tests
+			mockHashingService := &MockHashingService{mockHashingError: tC.password == ""}
+
+			// Create an instance of DefaultRegistrationService with the injected hashing service
+			service := &DefaultRegistrationService{
+				hashingService: mockHashingService,
+			}
 
 			// Call the RegisterUser function with the test case input
 			registerErr := service.RegisterUser(tC.username, tC.password, tempFile)
 
 			if tC.hasError {
 				assert.Error(t, registerErr, "Expected an error")
+				assert.IsType(t, hashing.ErrHashingFailure, registerErr, "Unexpected error type")
 			} else {
 				assert.NoError(t, registerErr, "Unexpected error")
 			}
@@ -71,4 +78,5 @@ func TestRegisterUser(t *testing.T) {
 			}
 		})
 	}
+
 }

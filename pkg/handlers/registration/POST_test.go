@@ -36,7 +36,7 @@ func Test(t *testing.T) {
 			mockRegistrationService := &MockRegistrationService{}
 
 			// Call the handler with the mock registration service
-			RegisterPOSTHandler(rr, req, mockRegistrationService)
+			RegisterPOSTHandler(mockRegistrationService).ServeHTTP(rr, req) // This line was missing
 
 			// Assert the status code
 			assert.Equal(t, tC.expectedStatusCode, rr.Code, "Unexpected status code")
@@ -51,7 +51,7 @@ func Test(t *testing.T) {
 type MockRegistrationService struct{}
 
 // RegisterUser implements the mock registration logic.
-func (s *MockRegistrationService) RegisterUser(username, password string) error {
+func (s *MockRegistrationService) RegisterUser(username, password string, fileame string) error {
 	// Simulate successful registration
 	return nil
 }
