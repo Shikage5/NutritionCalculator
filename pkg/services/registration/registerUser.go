@@ -11,16 +11,21 @@ type RegistrationService interface {
 }
 
 // DefaultRegistrationService is the default implementation of RegistrationService.
-type DefaultRegistrationService struct{}
+type DefaultRegistrationService struct {
+	HashingService hashing.HashingService
+	DataFilePath   string
+}
 
-func NewRegistrationService() *DefaultRegistrationService {
-	return &DefaultRegistrationService{}
+func NewRegistrationService(dataFilePath string) *DefaultRegistrationService {
+	return &DefaultRegistrationService{
+		DataFilePath: dataFilePath,
+	}
 }
 
 // RegisterUser implements the registration logic.
 func (s *DefaultRegistrationService) RegisterUser(username, password string, filename string) error {
 
-	hashedPassword, err := hashing.HashPassword(password)
+	hashedPassword, err := s.HashingService.HashPassword(password)
 	if err != nil {
 		return err
 	}
@@ -30,7 +35,6 @@ func (s *DefaultRegistrationService) RegisterUser(username, password string, fil
 		PasswordHash: hashedPassword,
 	}
 
-	// Write the user to the "data/users.json" file
 	if err := models.WriteUserInJSONFile(user, filename); err != nil {
 		return err
 	}

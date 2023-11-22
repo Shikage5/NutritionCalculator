@@ -2,11 +2,17 @@ package hashing
 
 import "golang.org/x/crypto/bcrypt"
 
-func HashPassword(password string) (string, error) {
+type HashingService interface {
+	HashPassword(password string) (string, error)
+}
 
-	hash, err := bcrypt.GenerateFromPassword([]byte(password), 12)
+type DefaultHashingService struct{}
+
+func (h *DefaultHashingService) HashPassword(password string) (string, error) {
+	// Implement hashing logic using a secure algorithm (e.g., bcrypt)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return "", err
 	}
-	return string(hash), nil
+	return string(hashedPassword), nil
 }

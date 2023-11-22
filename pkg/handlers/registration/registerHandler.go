@@ -13,8 +13,9 @@ func RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	case http.MethodGet:
 		RegisterGETHandler(w, r)
 	case http.MethodPost:
+		filePath := "data/users.json"
 		validator := validation.NewCredentialsValidator()
-		registrator := registration.NewRegistrationService()
+		registrator := registration.NewRegistrationService(filePath)
 		middleware.ValidateUser(validator, RegisterPOSTHandler(registrator))
 	default:
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)

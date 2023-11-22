@@ -1,6 +1,7 @@
 package registrationHandlers
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -9,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test(t *testing.T) {
+func TestRegisterPOSTHandler(t *testing.T) {
 	testCases := []struct {
 		desc               string
 		requestBody        string
@@ -21,6 +22,12 @@ func Test(t *testing.T) {
 			requestBody:        "username=test&password=testpass",
 			expectedStatusCode: http.StatusOK,
 			expectedResponse:   "Registration successful",
+		},
+		{
+			desc:               "Unsuccessful registration",
+			requestBody:        "username=test&password=",
+			expectedStatusCode: http.StatusInternalServerError,
+			expectedResponse:   "Registration unsuccessful",
 		},
 	}
 	for _, tC := range testCases {
@@ -36,7 +43,7 @@ func Test(t *testing.T) {
 			mockRegistrationService := &MockRegistrationService{}
 
 			// Call the handler with the mock registration service
-			RegisterPOSTHandler(mockRegistrationService).ServeHTTP(rr, req) // This line was missing
+			RegisterPOSTHandler(mockRegistrationService).ServeHTTP(rr, req)
 
 			// Assert the status code
 			assert.Equal(t, tC.expectedStatusCode, rr.Code, "Unexpected status code")
@@ -47,11 +54,13 @@ func Test(t *testing.T) {
 	}
 }
 
-// MockRegistrationService is a mock implementation of RegistrationService for testing.
-type MockRegistrationService struct{}
+type MockRegistrationService struct {
+	shouldError bool
+}
 
-// RegisterUser implements the mock registration logic.
-func (s *MockRegistrationService) RegisterUser(username, password string, fileame string) error {
-	// Simulate successful registration
+func (m *MockRegistrationService) RegisterUser(username, password, filename string) error {
+	if m.shouldError {
+		return errors.New("mock registration error")
+	}
 	return nil
 }

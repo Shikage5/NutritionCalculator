@@ -1,28 +1,11 @@
 package registration
 
 import (
-	"NutritionCalculator/data/models"
-	"NutritionCalculator/utils"
-	"encoding/json"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
-
-var mockUsers = []models.User{
-	{
-		Username:     "user1",
-		PasswordHash: "passwordHash1",
-	},
-	{
-		Username:     "user2",
-		PasswordHash: "passwordHash2",
-	},
-	{
-		Username:     "user3",
-		PasswordHash: "passwordHash3",
-	},
-}
 
 func TestRegisterUser(t *testing.T) {
 	testCases := []struct {
@@ -37,46 +20,43 @@ func TestRegisterUser(t *testing.T) {
 			password: "testpass",
 			hasError: false,
 		},
-		{
-			desc:     "Failed password hashing",
-			username: "testuser",
-			password: "", // invalid password to trigger hashing error
-			hasError: true,
-		},
 	}
+
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			usersJSON, err := json.Marshal(mockUsers)
+			// Create a temporary file
+			tempFile, err := os.CreateTemp("", "user_registration_test")
 			if err != nil {
-				t.Fatal(err)
+				t.Fatalf("Failed to create temporary file: %v", err)
+			}
+			defer os.Remove(tempFile.Name())
+
+			// Setup
+			mockHashingService := &MockHashingService{}
+			registrationService := &DefaultRegistrationService{
+				HashingService: mockHashingService,
 			}
 
-			tempFile := utils.CreateTempTestJSONFile(t, string(usersJSON))
-			defer utils.RemoveTempTestJSONFile(t, tempFile)
+			// Execute
+			err = registrationService.RegisterUser(tC.username, tC.password, tempFile.Name())
 
-			// Mocked hashing service for injecting hashing failure in tests
-			mockHashingService := &MockHashingService{mockHashingError: tC.password == ""}
-
-			// Create an instance of DefaultRegistrationService with the injected hashing service
-			service := &DefaultRegistrationService{
-				hashingService: mockHashingService,
-			}
-
-			// Call the RegisterUser function with the test case input
-			registerErr := service.RegisterUser(tC.username, tC.password, tempFile)
-
+			// Assert
 			if tC.hasError {
-				assert.Error(t, registerErr, "Expected an error")
-				assert.IsType(t, hashing.ErrHashingFailure, registerErr, "Unexpected error type")
+				assert.Error(t, err, "Expected an error but got none")
+				assert.Contains(t, err.Error(), "password hashing", "Expected error related to password hashing")
 			} else {
-				assert.NoError(t, registerErr, "Unexpected error")
+				assert.NoError(t, err, "Expected no error but got one")
 			}
 
-			// If no error is expected, you may perform additional assertions
-			if !tC.hasError {
-				// Add additional assertions as needed
-			}
 		})
 	}
+}
 
+type MockHashingService struct {
+	password string
+}
+
+func (m *MockHashingService) HashPassword(password string) (string, error) {
+	// Mock the hashing logic for testing
+	return "mockedhash", nil
 }

@@ -7,6 +7,7 @@ import (
 )
 
 func TestHashPassword(t *testing.T) {
+
 	testCases := []struct {
 		desc          string
 		inputPassword string
@@ -23,13 +24,15 @@ func TestHashPassword(t *testing.T) {
 			desc:          "Password with Whitespace",
 			inputPassword: "  passwordWithSpaces  ",
 		},
+
 		// Add more test cases as needed
 	}
 
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
+			hashingService := &DefaultHashingService{}
 			// Run the actual test logic
-			hashedPassword, err := HashPassword(tC.inputPassword)
+			hashedPassword, err := HashingService.HashPassword(hashingService, tC.inputPassword)
 
 			// Check for errors
 			if err != nil {
