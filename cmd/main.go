@@ -2,6 +2,8 @@ package main
 
 import (
 	registrationHandlers "NutritionCalculator/pkg/handlers/registration"
+	"NutritionCalculator/pkg/services/registration"
+	"NutritionCalculator/pkg/services/validation"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,6 +14,11 @@ import (
 func greet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World! %s", time.Now())
 }
+
+var (
+	Validator   = validation.NewCredentialsValidator()
+	Registrator = registration.NewRegistrationService("data/users.json")
+)
 
 func main() {
 	http.HandleFunc("/", greet)

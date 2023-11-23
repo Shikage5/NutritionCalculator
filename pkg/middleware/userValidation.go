@@ -5,9 +5,11 @@ import (
 	"net/http"
 )
 
-// ValidateCredentialsMiddleware is a middleware that validates the username and password in the request body.
-func ValidateUser(validator validation.CredentialsValidator, next http.Handler) http.Handler {
+// ValidateUser is a middleware that validates the username and password in the request body.
+// ValidateUser is a middleware that validates the username and password in the request body.
+func ValidateUser(validator validation.CredentialsValidator, next http.HandlerFunc) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+
 		username := r.FormValue("username")
 		password := r.FormValue("password")
 
@@ -17,6 +19,6 @@ func ValidateUser(validator validation.CredentialsValidator, next http.Handler) 
 		}
 
 		// Call the next handler in the chain
-		next.ServeHTTP(w, r)
+		next(w, r)
 	})
 }

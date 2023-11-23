@@ -6,8 +6,8 @@ import (
 )
 
 // RegisterPOSTHandler handles the POST request for user registration.
-func RegisterPOSTHandler(registrationService registration.RegistrationService) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func RegisterPOSTHandler(registrationService registration.RegistrationService) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// Parse the form data from the HTTP request
 		err := r.ParseForm()
 		if err != nil {
@@ -28,5 +28,5 @@ func RegisterPOSTHandler(registrationService registration.RegistrationService) h
 
 		// Registration successful
 		w.Write([]byte("Registration successful"))
-	})
+	}
 }
