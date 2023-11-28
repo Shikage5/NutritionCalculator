@@ -9,11 +9,6 @@ type CredentialsValidator interface {
 // DefaultCredentialsValidator is a default implementation of CredentialsValidator.
 type DefaultCredentialsValidator struct{}
 
-// NewCredentialsValidator creates a new instance of DefaultCredentialsValidator.
-func NewCredentialsValidator() *DefaultCredentialsValidator {
-	return &DefaultCredentialsValidator{}
-}
-
 // ValidateCredentials checks if the username and password are not empty.
 func (v *DefaultCredentialsValidator) ValidateCredentials(username, password string) bool {
 	return username != "" && password != ""

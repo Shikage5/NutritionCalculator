@@ -1,9 +1,8 @@
 package main
 
 import (
-	registrationHandlers "NutritionCalculator/pkg/handlers/registration"
+	"NutritionCalculator/pkg/handlers"
 	"NutritionCalculator/pkg/services/registration"
-	"NutritionCalculator/pkg/services/validation"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,14 +14,11 @@ func greet(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello World! %s", time.Now())
 }
 
-var (
-	Validator   = validation.NewCredentialsValidator()
-	Registrator = registration.NewRegistrationService("data/users.json")
-)
-
 func main() {
+	registrationService := registration.NewRegistrationService("data/users.json") // Create a new registration service
+
 	http.HandleFunc("/", greet)
-	http.HandleFunc("/register", registrationHandlers.RegisterHandler)
+	http.HandleFunc("/register", handlers.RegisterHandler(registrationService))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")
