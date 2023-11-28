@@ -1,24 +1,27 @@
 package middleware
 
 import (
-	"NutritionCalculator/data/models"
 	"NutritionCalculator/pkg/services/validation"
-	"NutritionCalculator/utils"
+	"encoding/json"
 	"net/http"
 )
+
+type UserRequest struct {
+	Username string `json:"username"`
+	Password string `json:"password"`
+}
 
 // ValidateUser is a middleware that validates the username and password in the request body.
 func ValidateUser(validator validation.CredentialsValidator, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var user models.User
+		var userRequest UserRequest
 
-		err := utils.DecodeJSON(r.Body, &user)
+		err := json.NewDecoder(r.Body).Decode(&userRequest)
 		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
+			http.Error(w, "Invalid request body", http.StatusBadRequest)
 			return
 		}
-
-		if !validator.ValidateCredentials(user.Username, user.PasswordHash) {
+		if !validator.ValidateCredentials(userRequest.Username, userRequest.Password) {
 			http.Error(w, "Username and password are required", http.StatusBadRequest)
 			return
 		}

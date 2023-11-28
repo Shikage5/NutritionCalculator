@@ -70,7 +70,7 @@ type mockRegistrationService struct {
 	shouldFail bool
 }
 
-func (m *mockRegistrationService) RegisterUser(username, password string, filename string) error {
+func (m *mockRegistrationService) RegisterUser(username, password string) error {
 	if m.shouldFail {
 		// Simulate failure
 		return errors.New("Registration fail form")

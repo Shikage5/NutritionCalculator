@@ -6,5 +6,17 @@
     {
         "username": "user2",
         "passwordHash": "$2a$12$gZdmo0L9d7CZAdL7vRm/muiirUDws85nukqmGGkb0wQNbtGxvU4b."
+    },
+    {
+        "username": "gabriel",
+        "passwordHash": "$2a$10$K6yvx1C5XSal26FCoSBpye2d9ARtqIrivNJPxuwgyBkeT1rE8fZvG"
+    },
+    {
+        "username": "/test",
+        "passwordHash": "$2a$10$nPeKR57pkq0gK0nunHHOauiR7VVLKQaud9YwMkHmPxaiOpsRwmcyK"
+    },
+    {
+        "username": "asbdhflkj",
+        "passwordHash": "$2a$10$tiY7ssT8WAthbRY4DIBeauvSrY6fcIp5SM4bEjZaDfsEXxK.xhmBa"
     }
 ]

@@ -11,6 +11,7 @@
             "request": "launch",
             "mode": "debug",
             "program": "cmd/main.go",
+            "cwd": "${workspaceFolder}"
         },
         {
             "name": "Connect to server",

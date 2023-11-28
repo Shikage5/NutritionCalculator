@@ -35,10 +35,11 @@ func TestRegisterUser(t *testing.T) {
 			mockHashingService := &MockHashingService{}
 			registrationService := &DefaultRegistrationService{
 				HashingService: mockHashingService,
+				DataFilePath:   tempFile.Name(),
 			}
 
 			// Execute
-			err = registrationService.RegisterUser(tC.username, tC.password, tempFile.Name())
+			err = registrationService.RegisterUser(tC.username, tC.password)
 
 			// Assert
 			if tC.hasError {
