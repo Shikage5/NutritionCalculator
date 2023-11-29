@@ -2,6 +2,7 @@ package auth
 
 import (
 	"NutritionCalculator/data/models"
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -74,8 +75,26 @@ func TestAuth(t *testing.T) {
 	}
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			auth, err := Auth(tc.input, mockUsers)
+			// Create temp file
+			tempFile, err := os.CreateTemp("", "test")
+			if err != nil {
+				t.Fatal(err)
+			}
+			defer os.Remove(tempFile.Name())
 
+			// Write mock users to temp file
+			for _, u := range mockUsers {
+				err := models.WriteUserInJSONFile(u, tempFile.Name())
+				if err != nil {
+					t.Fatal(err)
+				}
+			}
+
+			// Create auth service
+			authService := DefaultAuthService{FilePath: tempFile.Name()}
+
+			// Test auth service
+			auth, err := authService.Auth(tc.input)
 			if tc.hasError {
 				assert.Error(t, err, "Expected an error")
 			} else {

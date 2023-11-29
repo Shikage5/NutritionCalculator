@@ -11,7 +11,7 @@ import (
 	"testing"
 )
 
-func TestRegister(t *testing.T) {
+func TestRegisterHandler(t *testing.T) {
 
 	testCases := []struct {
 		desc               string
@@ -49,6 +49,7 @@ func TestRegister(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			mockService := &mockRegistrationService{shouldFail: tC.expectedStatusCode == http.StatusInternalServerError}
+
 			var userRequest UserRequest
 			json.Unmarshal(tC.reqBody, &userRequest)
 
