@@ -1,8 +1,8 @@
 package handlers
 
 import (
+	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/registration"
-	"encoding/json"
 	"fmt"
 	"net/http"
 )
@@ -15,14 +15,12 @@ type UserRequest struct {
 func RegisterHandler(registrationService registration.RegistrationService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-
-			var userRequest UserRequest
-			err := json.NewDecoder(r.Body).Decode(&userRequest)
-			if err != nil {
-				http.Error(w, "Invalid request body", http.StatusBadRequest)
+			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(UserRequest)
+			if !ok {
+				http.Error(w, "Registration fail form", http.StatusBadRequest)
 				return
 			}
-			err = registrationService.RegisterUser(userRequest.Username, userRequest.Password)
+			err := registrationService.RegisterUser(userRequest.Username, userRequest.Password)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

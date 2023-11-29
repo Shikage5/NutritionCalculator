@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"bytes"
+	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"net/http/httptest"
@@ -46,10 +49,18 @@ func TestRegister(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			mockService := &mockRegistrationService{shouldFail: tC.expectedStatusCode == http.StatusInternalServerError}
+			var userRequest UserRequest
+			json.Unmarshal(tC.reqBody, &userRequest)
+
+			// Create a context with the UserRequest
+			ctx := context.WithValue(context.Background(), contextkeys.UserRequestKey, userRequest)
+
+			// Create the request with the context
 			req, err := http.NewRequest(tC.reqMethod, tC.reqURL, bytes.NewBuffer(tC.reqBody))
 			if err != nil {
-				t.Fatalf("Failed to create request: %v", err)
+				t.Fatal(err)
 			}
+			req = req.WithContext(ctx)
 
 			rr := httptest.NewRecorder()
 			handler := RegisterHandler(mockService) // Pass the mock registration service to the handler
