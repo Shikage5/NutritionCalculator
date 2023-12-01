@@ -3,6 +3,8 @@ package auth
 import (
 	"NutritionCalculator/data/models"
 	"errors"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService interface {
@@ -13,6 +15,8 @@ type DefaultAuthService struct {
 	FilePath string
 }
 
+var ErrInvalidCredentials = errors.New("invalid credentials")
+
 func (a DefaultAuthService) Auth(inputUser models.User) (bool, error) {
 	userList, err := models.ReadUsersFromJSONFile(a.FilePath)
 	if err != nil {
@@ -21,12 +25,13 @@ func (a DefaultAuthService) Auth(inputUser models.User) (bool, error) {
 	for _, u := range userList {
 		if inputUser.Username == u.Username {
 			// User found, check password hash
-			if inputUser.PasswordHash == u.PasswordHash {
-				return true, nil // User exists with the correct password
+			err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(inputUser.PasswordHash))
+			if err != nil {
+				return false, ErrInvalidCredentials // Wrong password
 			}
-			return false, errors.New("invalid credentials") // User exists with the wrong password
+			return true, nil // User exists with the correct password
 		}
 	}
 
-	return false, errors.New("invalid credentials") // User not found
+	return false, ErrInvalidCredentials // User not found
 }
