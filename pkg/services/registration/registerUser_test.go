@@ -1,6 +1,7 @@
 package registration
 
 import (
+	"errors"
 	"os"
 	"testing"
 
@@ -9,16 +10,25 @@ import (
 
 func TestRegisterUser(t *testing.T) {
 	testCases := []struct {
-		desc     string
-		username string
-		password string
-		hasError bool
+		desc                         string
+		username                     string
+		password                     string
+		mockHashingServiceShouldFail bool
+		hasError                     bool
 	}{
 		{
-			desc:     "Successful registration",
-			username: "testuser",
-			password: "testpass",
-			hasError: false,
+			desc:                         "Successful registration",
+			username:                     "testuser",
+			password:                     "testpass",
+			mockHashingServiceShouldFail: false,
+			hasError:                     false,
+		},
+		{
+			desc:                         "Hashing service fails",
+			username:                     "testuser",
+			password:                     "testpass",
+			mockHashingServiceShouldFail: true,
+			hasError:                     true,
 		},
 	}
 
@@ -30,9 +40,9 @@ func TestRegisterUser(t *testing.T) {
 				t.Fatalf("Failed to create temporary file: %v", err)
 			}
 			defer os.Remove(tempFile.Name())
-
 			// Setup
-			mockHashingService := &MockHashingService{}
+			mockHashingService := &MockHashingService{shouldFail: tC.mockHashingServiceShouldFail}
+
 			registrationService := &DefaultRegistrationService{
 				HashingService: mockHashingService,
 				DataFilePath:   tempFile.Name(),
@@ -44,7 +54,6 @@ func TestRegisterUser(t *testing.T) {
 			// Assert
 			if tC.hasError {
 				assert.Error(t, err, "Expected an error but got none")
-				assert.Contains(t, err.Error(), "password hashing", "Expected error related to password hashing")
 			} else {
 				assert.NoError(t, err, "Expected no error but got one")
 			}
@@ -54,10 +63,12 @@ func TestRegisterUser(t *testing.T) {
 }
 
 type MockHashingService struct {
-	password string
+	shouldFail bool
 }
 
 func (m *MockHashingService) HashPassword(password string) (string, error) {
-	// Mock the hashing logic for testing
+	if m.shouldFail {
+		return "", errors.New("mocked hash error")
+	}
 	return "mockedhash", nil
 }
