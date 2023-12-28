@@ -1,4 +1,3 @@
-// pkg/contextkeys/keys.go
 package contextkeys
 
 type ContextKey string

@@ -7,40 +7,51 @@ import (
 	"time"
 )
 
-var SessionMap = make(map[string]string)
+// SessionService defines the interface for session management.
+type SessionService interface {
+	CreateSession(username string, w http.ResponseWriter) error
+	GenerateSessionID() (string, error)
+}
 
-func CreateSession(username string, w http.ResponseWriter) error {
+// InMemorySessionService implements the SessionManager interface using an in-memory map.
+type DefaultSessionService struct {
+	SessionMap map[string]string
+}
+
+func (m *DefaultSessionService) CreateSession(username string, w http.ResponseWriter) error {
 	// Generate a new session ID
-	sessionID, err := GenerateSessionID()
+	sessionID, err := m.GenerateSessionID()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return err
 	}
 
 	// Add the session to the session map
-	SessionMap[sessionID] = username
+	m.SessionMap[sessionID] = username
 
 	// Set the session duration
 	sessionDuration := 1 * time.Minute
 
 	// Set a cookie with the session ID
 	http.SetCookie(w, &http.Cookie{
-		Name:   "session_id",
-		Value:  sessionID,
-		MaxAge: int(sessionDuration.Seconds()),
+		Name:     "session_id",
+		Value:    sessionID,
+		MaxAge:   int(sessionDuration.Seconds()),
+		HttpOnly: true,
+		Secure:   true,
 	})
 
 	// Start a goroutine to delete the session data when the session duration is over
 	go func() {
 		time.Sleep(sessionDuration)
-		delete(SessionMap, sessionID)
+		delete(m.SessionMap, sessionID)
 	}()
 
 	return nil
 }
 
 // GenerateSessionID generates a session ID for a user.
-func GenerateSessionID() (string, error) {
+func (m *DefaultSessionService) GenerateSessionID() (string, error) {
 	// Generate a random byte slice with 32 bytes
 	randomBytes := make([]byte, 32)
 	_, err := rand.Read(randomBytes)

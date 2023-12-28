@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func sessionMiddleware(next http.Handler) http.Handler {
+func sessionMiddleware(sessionService session.DefaultSessionService, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		// Get the session ID from the cookie
 		cookie, err := r.Cookie("session_id")
@@ -19,7 +19,7 @@ func sessionMiddleware(next http.Handler) http.Handler {
 		sessionID := cookie.Value
 
 		// Get the user data from the session map
-		userData, ok := session.SessionMap[sessionID]
+		userData, ok := sessionService.SessionMap[sessionID]
 
 		if !ok {
 			// If the session ID is not in the session map, redirect to the login page

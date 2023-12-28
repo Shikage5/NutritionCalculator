@@ -8,13 +8,13 @@ import (
 	"net/http"
 )
 
-func LoginHandler(authService auth.AuthService) http.HandlerFunc {
+func LoginHandler(authService auth.AuthService, sessionService session.SessionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			// Get the user request from the context
 			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(UserRequest)
 			if !ok {
-				http.Error(w, "Invalid form data", http.StatusBadRequest)
+				http.Error(w, "invalid form data", http.StatusBadRequest)
 				return
 			}
 			// Create a user object
@@ -29,11 +29,11 @@ func LoginHandler(authService auth.AuthService) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			} else if !authenticated {
-				http.Error(w, "invalid credentials", http.StatusUnauthorized)
+				http.Error(w, auth.ErrInvalidCredentials.Error(), http.StatusUnauthorized)
 				return
 			}
-
-			err = session.CreateSession(user.Username, w)
+			// Create a session
+			err = sessionService.CreateSession(user.Username, w)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

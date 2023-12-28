@@ -6,6 +6,7 @@ import (
 	"NutritionCalculator/pkg/services/auth"
 	"NutritionCalculator/pkg/services/hashing"
 	"NutritionCalculator/pkg/services/registration"
+	"NutritionCalculator/pkg/services/session"
 	"NutritionCalculator/pkg/services/validation"
 	"fmt"
 	"log"
@@ -30,10 +31,13 @@ func main() {
 	authService := &auth.DefaultAuthService{
 		FilePath: dataFilePath,
 	}
+	sessionService := &session.DefaultSessionService{
+		SessionMap: make(map[string]string),
+	}
 
 	http.HandleFunc("/", greet)
-	http.HandleFunc("/register", middleware.ValidateUser(validationService, handlers.RegisterHandler(registrationService)))
-	http.HandleFunc("/login", middleware.ValidateUser(validationService, handlers.LoginHandler(authService)))
+	http.HandleFunc("/register", middleware.ValidateUser(validationService, sessionService, handlers.RegisterHandler(registrationService)))
+	http.HandleFunc("/login", middleware.ValidateUser(validationService, sessionService, handlers.LoginHandler(authService, sessionService)))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")

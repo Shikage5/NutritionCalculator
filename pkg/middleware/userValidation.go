@@ -3,6 +3,7 @@ package middleware
 import (
 	contextKeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/handlers"
+	"NutritionCalculator/pkg/services/session"
 	"NutritionCalculator/pkg/services/validation"
 	"context"
 	"encoding/json"
@@ -10,7 +11,7 @@ import (
 )
 
 // ValidateUser is a middleware that validates the username and password in the request body.
-func ValidateUser(validator validation.CredentialsValidationService, next http.HandlerFunc) http.HandlerFunc {
+func ValidateUser(validator validation.CredentialsValidationService, sessionService session.SessionService, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			var userRequest handlers.UserRequest
