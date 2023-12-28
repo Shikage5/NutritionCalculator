@@ -46,7 +46,7 @@ func TestSessionMiddleware(t *testing.T) {
 				assert.NotNil(t, value)
 			})
 
-			handler := sessionMiddleware(sessionService, nextHandler)
+			handler := SessionMiddleware(sessionService, nextHandler)
 
 			// Execute
 			rr := httptest.NewRecorder()

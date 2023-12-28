@@ -1,6 +1,7 @@
 package main
 
 import (
+	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/handlers"
 	"NutritionCalculator/pkg/middleware"
 	"NutritionCalculator/pkg/services/auth"
@@ -12,11 +13,10 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
-	"time"
 )
 
 func greet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World! %s", time.Now())
+	fmt.Fprintf(w, "Hello, %s!", r.Context().Value(contextkeys.UserKey))
 }
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 		SessionMap: make(map[string]string),
 	}
 
-	http.HandleFunc("/", greet)
+	http.HandleFunc("/", middleware.SessionMiddleware(sessionService, greet))
 	http.HandleFunc("/register", middleware.ValidateUser(validationService, handlers.RegisterHandler(registrationService)))
 	http.HandleFunc("/login", middleware.ValidateUser(validationService, handlers.LoginHandler(authService, sessionService)))
 

@@ -7,8 +7,8 @@ import (
 	"net/http"
 )
 
-func sessionMiddleware(sessionService session.SessionService, next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func SessionMiddleware(sessionService session.SessionService, next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		// Get the session ID from the cookie
 		cookie, err := r.Cookie("session_id")
 		if err != nil {
@@ -32,5 +32,5 @@ func sessionMiddleware(sessionService session.SessionService, next http.Handler)
 
 		// Call the next handler with the updated context
 		next.ServeHTTP(w, r.WithContext(ctx))
-	})
+	}
 }
