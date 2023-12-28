@@ -27,7 +27,7 @@ func main() {
 		HashingService: hashingService,
 		DataFilePath:   dataFilePath,
 	}
-	validationService := &validation.DefaultCredentialsValidationService{}
+	validationService := &validation.CredentialsValidationService{}
 	authService := &auth.DefaultAuthService{
 		FilePath: dataFilePath,
 	}
@@ -36,8 +36,8 @@ func main() {
 	}
 
 	http.HandleFunc("/", greet)
-	http.HandleFunc("/register", middleware.ValidateUser(validationService, sessionService, handlers.RegisterHandler(registrationService)))
-	http.HandleFunc("/login", middleware.ValidateUser(validationService, sessionService, handlers.LoginHandler(authService, sessionService)))
+	http.HandleFunc("/register", middleware.ValidateUser(validationService, handlers.RegisterHandler(registrationService)))
+	http.HandleFunc("/login", middleware.ValidateUser(validationService, handlers.LoginHandler(authService, sessionService)))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")

@@ -1,58 +1,83 @@
 package middleware_test
 
 import (
+	"bytes"
+	"encoding/json"
 	"net/http"
-	"net/url"
+	"net/http/httptest"
 	"testing"
+
+	contextkeys "NutritionCalculator/pkg/contextKeys"
+	"NutritionCalculator/pkg/handlers"
+	"NutritionCalculator/pkg/middleware"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestValidateUser(t *testing.T) {
 	testCases := []struct {
-		desc     string
-		username string
-		password string
-		status   int
+		desc        string
+		userRequest handlers.UserRequest
+		shouldFail  bool
+		status      int
 	}{
 		{
-			desc:     "Valid Request",
-			username: "john",
-			password: "secretpassword",
-			status:   http.StatusOK,
+			desc: "Valid Request",
+			userRequest: handlers.UserRequest{
+				Username: "john",
+				Password: "secretpassword",
+			},
+			shouldFail: false,
+			status:     http.StatusOK,
 		},
 		{
-			desc:     "Username field empty",
-			username: "",
-			password: "secretpassword",
-			status:   http.StatusBadRequest,
-		},
-		{
-			desc:     "Password field empty",
-			username: "john",
-			password: "",
-			status:   http.StatusBadRequest,
-		},
-		{
-			desc:     "EmptyCredentials",
-			username: "",
-			password: "",
-			status:   http.StatusBadRequest,
+			desc: "Invalid Request",
+			userRequest: handlers.UserRequest{
+				Username: "",
+				Password: "secretpassword",
+			},
+			shouldFail: true,
+			status:     http.StatusBadRequest,
 		},
 	}
+
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			form := url.Values{}
-			form.Set("username", tC.username)
-			form.Set("password", tC.password)
+			// Setup
+			jsonUserRequest, _ := json.Marshal(tC.userRequest)
+			req, err := http.NewRequest("POST", "/login", bytes.NewBuffer(jsonUserRequest))
+			if err != nil {
+				t.Fatalf("Failed to create request: %v", err)
+			}
+			req.Header.Set("Content-Type", "application/json")
 
+			validator := &MockValidatorService{shouldFail: tC.shouldFail}
+			nextHandler := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				value := r.Context().Value(contextkeys.UserRequestKey)
+				assert.Equal(t, tC.userRequest, value)
+			})
+
+			handler := middleware.ValidateUser(validator, nextHandler)
+
+			// Execute
+			rr := httptest.NewRecorder()
+			handler.ServeHTTP(rr, req)
+
+			// Assert
+			assert.Equal(t, tC.status, rr.Code, "Unexpected status code")
 		})
 	}
 }
 
-type MockCredentialsValidator struct {
-	ShouldValidate bool
+// mock validator
+type MockValidatorService struct {
+	shouldFail bool
 }
 
-func (v *MockCredentialsValidator) ValidateCredentials(username, password string) bool {
-	// Return the value of ShouldValidate, simulating a successful or unsuccessful validation
-	return v.ShouldValidate
+func (m *MockValidatorService) ValidateCredentials(username, password string) bool {
+	if m.shouldFail {
+		return false
+	} else {
+		return true
+	}
 }

@@ -42,7 +42,7 @@ func TestValidateCredentials(t *testing.T) {
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
 			// Setup
-			validationService := &DefaultCredentialsValidationService{}
+			validationService := &CredentialsValidationService{}
 
 			// Execute
 			result := validationService.ValidateCredentials(tC.username, tC.password)

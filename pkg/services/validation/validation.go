@@ -1,15 +1,15 @@
 // validation.go
 package validation
 
-// CredentialsValidationService is an interface for validation of username and password.
-type CredentialsValidationService interface {
+// ValidationService is an interface for validation of username and password.
+type ValidationService interface {
 	ValidateCredentials(username, password string) bool
 }
 
-// DefaultCredentialsValidationService is a default implementation of CredentialsValidationService.
-type DefaultCredentialsValidationService struct{}
+// CredentialsValidationService is a default implementation of ValidationService.
+type CredentialsValidationService struct{}
 
 // ValidateCredentials checks if the username and password are not empty.
-func (v *DefaultCredentialsValidationService) ValidateCredentials(username, password string) bool {
+func (v *CredentialsValidationService) ValidateCredentials(username, password string) bool {
 	return username != "" && password != ""
 }
