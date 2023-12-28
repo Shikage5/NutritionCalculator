@@ -124,3 +124,6 @@ func (m mockSessionService) CreateSession(username string, w http.ResponseWriter
 func (m *mockSessionService) GenerateSessionID() (string, error) {
 	return "", nil
 }
+func (m *mockSessionService) GetSession(sessionID string) (string, bool) {
+	return "", false
+}

@@ -11,9 +11,10 @@ import (
 type SessionService interface {
 	CreateSession(username string, w http.ResponseWriter) error
 	GenerateSessionID() (string, error)
+	GetSession(sessionID string) (string, bool)
 }
 
-// InMemorySessionService implements the SessionManager interface using an in-memory map.
+// InMemorySessionService implements the SessionService interface using an in-memory map.
 type DefaultSessionService struct {
 	SessionMap map[string]string
 }
@@ -63,4 +64,13 @@ func (m *DefaultSessionService) GenerateSessionID() (string, error) {
 	sessionID := base64.URLEncoding.EncodeToString(randomBytes)
 
 	return sessionID, nil
+}
+
+// GetSession returns the username for a given session ID.
+func (m *DefaultSessionService) GetSession(sessionID string) (string, bool) {
+	username, ok := m.SessionMap[sessionID]
+	if !ok {
+		return "", false
+	}
+	return username, true
 }
