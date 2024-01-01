@@ -12,7 +12,7 @@ type Food struct {
 	Fiber               float64
 	Water               float64
 	ReferenceWeight     float64
-	PackagingUnitWeight float64
+	UnitWeight          float64
 }
 
 // methods for creating, editing, and deleting food items go here

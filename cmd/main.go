@@ -9,14 +9,24 @@ import (
 	"NutritionCalculator/pkg/services/registration"
 	"NutritionCalculator/pkg/services/session"
 	"NutritionCalculator/pkg/services/validation"
-	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 )
 
 func greet(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello, %s!", r.Context().Value(contextkeys.UserKey))
+	tmpl, err := template.ParseFiles("web/template/greet.html")
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	user := r.Context().Value(contextkeys.UserKey)
+	err = tmpl.Execute(w, user)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	}
 }
 
 func main() {
