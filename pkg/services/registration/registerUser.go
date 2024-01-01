@@ -3,6 +3,8 @@ package registration
 import (
 	"NutritionCalculator/data/models"
 	"NutritionCalculator/pkg/services/hashing"
+	"encoding/json"
+	"os"
 )
 
 // RegistrationService defines the interface for user registration.
@@ -13,7 +15,8 @@ type RegistrationService interface {
 // DefaultRegistrationService is the default implementation of RegistrationService.
 type DefaultRegistrationService struct {
 	HashingService hashing.HashingService
-	DataFilePath   string
+	FilePath       string
+	UserDataPath   string
 }
 
 // RegisterUser implements the registration logic.
@@ -29,7 +32,19 @@ func (s *DefaultRegistrationService) RegisterUser(username, password string) err
 		PasswordHash: hashedPassword,
 	}
 
-	if err := models.WriteUserInJSONFile(user, s.DataFilePath); err != nil {
+	if err := models.WriteUserInJSONFile(user, s.FilePath); err != nil {
+		return err
+	}
+	// Create a new user data file
+	userDataFile, err := os.Create(s.UserDataPath + username + ".json")
+	if err != nil {
+		return err
+	}
+	defer userDataFile.Close()
+
+	// Initialize the file with an empty JSON object
+	emptyData := make(map[string]interface{})
+	if err := json.NewEncoder(userDataFile).Encode(emptyData); err != nil {
 		return err
 	}
 

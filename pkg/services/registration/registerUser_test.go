@@ -40,12 +40,21 @@ func TestRegisterUser(t *testing.T) {
 				t.Fatalf("Failed to create temporary file: %v", err)
 			}
 			defer os.Remove(tempFile.Name())
+
+			// Create a temporary directory for user data files
+			tempDir, err := os.MkdirTemp("", "user_data_test")
+			if err != nil {
+				t.Fatalf("Failed to create temporary directory: %v", err)
+			}
+			defer os.RemoveAll(tempDir)
+
 			// Setup
 			mockHashingService := &MockHashingService{shouldFail: tC.mockHashingServiceShouldFail}
 
 			registrationService := &DefaultRegistrationService{
 				HashingService: mockHashingService,
-				DataFilePath:   tempFile.Name(),
+				FilePath:       tempFile.Name(),
+				UserDataPath:   tempDir + "/",
 			}
 
 			// Execute
@@ -56,8 +65,11 @@ func TestRegisterUser(t *testing.T) {
 				assert.Error(t, err, "Expected an error but got none")
 			} else {
 				assert.NoError(t, err, "Expected no error but got one")
-			}
 
+				// Assert that the user data file was created
+				_, err = os.Stat(tempDir + "/" + tC.username + ".json")
+				assert.NoError(t, err, "Expected user data file to exist but it does not")
+			}
 		})
 	}
 }

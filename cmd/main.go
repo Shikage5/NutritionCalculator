@@ -20,16 +20,18 @@ func greet(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	dataFilePath := "data/users.json"
+	const userDataPath = "data/user_data/"
+	const credentialsDataPath = "data/users.json"
 
 	hashingService := &hashing.DefaultHashingService{}
 	registrationService := &registration.DefaultRegistrationService{
 		HashingService: hashingService,
-		DataFilePath:   dataFilePath,
+		FilePath:       credentialsDataPath,
+		UserDataPath:   userDataPath,
 	}
 	validationService := &validation.CredentialsValidationService{}
 	authService := &auth.DefaultAuthService{
-		FilePath: dataFilePath,
+		FilePath: credentialsDataPath,
 	}
 	sessionService := &session.DefaultSessionService{
 		SessionMap: make(map[string]string),
