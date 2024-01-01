@@ -8,7 +8,7 @@ import (
 )
 
 type AuthService interface {
-	Auth(inputUser models.User) (bool, error)
+	Auth(inputUser models.UserCredentials) (bool, error)
 }
 
 type DefaultAuthService struct {
@@ -17,7 +17,7 @@ type DefaultAuthService struct {
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
-func (a DefaultAuthService) Auth(inputUser models.User) (bool, error) {
+func (a DefaultAuthService) Auth(inputUser models.UserCredentials) (bool, error) {
 	userList, err := models.ReadUsersFromJSONFile(a.FilePath)
 	if err != nil {
 		return false, err

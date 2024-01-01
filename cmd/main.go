@@ -21,7 +21,7 @@ func greet(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	const userDataPath = "data/user_data/"
-	const credentialsDataPath = "data/users.json"
+	const credentialsDataPath = "data/userCredentials.json"
 
 	hashingService := &hashing.DefaultHashingService{}
 	registrationService := &registration.DefaultRegistrationService{

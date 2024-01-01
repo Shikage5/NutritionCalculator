@@ -6,22 +6,22 @@ import (
 	"os"
 )
 
-type User struct {
+type UserCredentials struct {
 	Username     string `json:"username"`
 	PasswordHash string `json:"passwordHash"`
 }
 
-func ReadUsersFromJSONFile(filename string) ([]User, error) {
+func ReadUsersFromJSONFile(filename string) ([]UserCredentials, error) {
 	data, err := os.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
 
-	var users []User
+	var users []UserCredentials
 
 	if len(data) == 0 {
 		// The JSON file is empty, so initialize 'users' as an empty slice
-		users = []User{}
+		users = []UserCredentials{}
 	} else {
 		if err := json.Unmarshal(data, &users); err != nil {
 			return nil, err
@@ -31,7 +31,7 @@ func ReadUsersFromJSONFile(filename string) ([]User, error) {
 	return users, nil
 }
 
-func WriteUserInJSONFile(newUser User, filename string) error {
+func WriteUserInJSONFile(newUser UserCredentials, filename string) error {
 
 	if newUser.Username == "" || newUser.PasswordHash == "" {
 		return errors.New("username and password cannot be empty")

@@ -27,7 +27,7 @@ func (s *DefaultRegistrationService) RegisterUser(username, password string) err
 		return err
 	}
 
-	user := models.User{
+	user := models.UserCredentials{
 		Username:     username,
 		PasswordHash: hashedPassword,
 	}

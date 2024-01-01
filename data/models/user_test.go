@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var mockUsers = []User{
+var mockUserCredentials = []UserCredentials{
 	{
 		Username:     "user1",
 		PasswordHash: "passwordHash1",
@@ -28,19 +28,19 @@ func TestReadUsersFromJSONFile(t *testing.T) {
 	testCases := []struct {
 		name     string
 		input    string
-		expected []User
+		expected []UserCredentials
 		hasError bool
 	}{
 		{
 			name:     "Valid JSON",
 			input:    `[{"username": "user1", "passwordHash": "hash1"}]`,
-			expected: []User{{Username: "user1", PasswordHash: "hash1"}},
+			expected: []UserCredentials{{Username: "user1", PasswordHash: "hash1"}},
 			hasError: false,
 		},
 		{
 			name:     "Empty File",
 			input:    "",
-			expected: []User{},
+			expected: []UserCredentials{},
 			hasError: false,
 		},
 		{
@@ -72,39 +72,39 @@ func TestReadUsersFromJSONFile(t *testing.T) {
 func TestWriteUserInJSONFile(t *testing.T) {
 	testCases := []struct {
 		desc     string
-		input    User
+		input    UserCredentials
 		hasError bool
 	}{
 		{
 			desc:     "User added correctly",
-			input:    User{Username: "newUser", PasswordHash: "newPasswordHash"},
+			input:    UserCredentials{Username: "newUser", PasswordHash: "newPasswordHash"},
 			hasError: false,
 		},
 		{
 			desc:     "Username already exists",
-			input:    User{Username: "user1", PasswordHash: "newPasswordHash"},
+			input:    UserCredentials{Username: "user1", PasswordHash: "newPasswordHash"},
 			hasError: true,
 		},
 		{
 			desc:     "Empty Username",
-			input:    User{Username: "", PasswordHash: "newPasswordHash"},
+			input:    UserCredentials{Username: "", PasswordHash: "newPasswordHash"},
 			hasError: true,
 		},
 		{
 			desc:     "Empty Password",
-			input:    User{Username: "newUser", PasswordHash: ""},
+			input:    UserCredentials{Username: "newUser", PasswordHash: ""},
 			hasError: true,
 		},
 		{
 			desc:     "Empty Input",
-			input:    User{Username: "", PasswordHash: ""},
+			input:    UserCredentials{Username: "", PasswordHash: ""},
 			hasError: true,
 		},
 	}
 	for _, tC := range testCases {
 		t.Run(tC.desc, func(t *testing.T) {
-			//mockUsers to JSON
-			usersJSON, err := json.Marshal(mockUsers)
+			//mockUserCredentials to JSON
+			usersJSON, err := json.Marshal(mockUserCredentials)
 			if err != nil {
 				t.Fatal(err)
 			}

@@ -7,7 +7,7 @@ import (
 
 // Helper function to create a temporary test JSON file
 func CreateTempTestJSONFile(t *testing.T, content string) string {
-	tempFile, err := os.CreateTemp("", "test_users.json")
+	tempFile, err := os.CreateTemp("", "test_userCredentials.json")
 	if err != nil {
 		t.Fatal(err)
 	}

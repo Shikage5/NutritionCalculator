@@ -13,7 +13,7 @@ var hashedPassword1, _ = bcrypt.GenerateFromPassword([]byte("password1"), bcrypt
 var hashedPassword2, _ = bcrypt.GenerateFromPassword([]byte("password2"), bcrypt.DefaultCost)
 var hashedPassword3, _ = bcrypt.GenerateFromPassword([]byte("password3"), bcrypt.DefaultCost)
 
-var mockUsers = []models.User{
+var mockUserCredentials = []models.UserCredentials{
 	{
 		Username:     "user1",
 		PasswordHash: string(hashedPassword1),
@@ -31,48 +31,48 @@ var mockUsers = []models.User{
 func TestAuth(t *testing.T) {
 	testCases := []struct {
 		name     string
-		input    models.User
+		input    models.UserCredentials
 		hasError bool
 		errMsg   string
 	}{
 		{
 			name:     "user exists, right password",
-			input:    models.User{Username: "user1", PasswordHash: "password1"},
+			input:    models.UserCredentials{Username: "user1", PasswordHash: "password1"},
 			hasError: false,
 		},
 		{
 			name:     "user exists, wrong password",
-			input:    models.User{Username: "user1", PasswordHash: "wrongPassword"},
+			input:    models.UserCredentials{Username: "user1", PasswordHash: "wrongPassword"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "user does not exist",
-			input:    models.User{Username: "nonexistentUser", PasswordHash: "password1"},
+			input:    models.UserCredentials{Username: "nonexistentUser", PasswordHash: "password1"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "empty username and password",
-			input:    models.User{Username: "", PasswordHash: ""},
+			input:    models.UserCredentials{Username: "", PasswordHash: ""},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "empty username, valid password",
-			input:    models.User{Username: "", PasswordHash: "password1"},
+			input:    models.UserCredentials{Username: "", PasswordHash: "password1"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "valid username, empty password",
-			input:    models.User{Username: "user1", PasswordHash: ""},
+			input:    models.UserCredentials{Username: "user1", PasswordHash: ""},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "nonexistent username, valid password",
-			input:    models.User{Username: "nonexistentUser", PasswordHash: "password1"},
+			input:    models.UserCredentials{Username: "nonexistentUser", PasswordHash: "password1"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
@@ -87,7 +87,7 @@ func TestAuth(t *testing.T) {
 			defer os.Remove(tempFile.Name())
 
 			// Write mock users to temp file
-			for _, u := range mockUsers {
+			for _, u := range mockUserCredentials {
 				err := models.WriteUserInJSONFile(u, tempFile.Name())
 				if err != nil {
 					t.Fatal(err)

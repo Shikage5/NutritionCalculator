@@ -17,11 +17,11 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 				http.Error(w, "invalid form data", http.StatusBadRequest)
 				return
 			}
-			// Create a user object
-			user := models.User{Username: userRequest.Username, PasswordHash: userRequest.Password}
+			// Create a userCredentials object
+			userCredentials := models.UserCredentials{Username: userRequest.Username, PasswordHash: userRequest.Password}
 
 			// Authenticate the user
-			authenticated, err := authService.Auth(user)
+			authenticated, err := authService.Auth(userCredentials)
 			if err == auth.ErrInvalidCredentials {
 				http.Error(w, err.Error(), http.StatusUnauthorized)
 				return
@@ -33,7 +33,7 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 				return
 			}
 			// Create a session
-			err = sessionService.CreateSession(user.Username, w)
+			err = sessionService.CreateSession(userCredentials.Username, w)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

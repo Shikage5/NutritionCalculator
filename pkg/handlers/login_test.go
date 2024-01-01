@@ -103,7 +103,7 @@ type mockAuthService struct {
 	shouldFail bool
 }
 
-func (m mockAuthService) Auth(inputUser models.User) (bool, error) {
+func (m mockAuthService) Auth(inputUser models.UserCredentials) (bool, error) {
 	if m.shouldFail {
 		return false, auth.ErrInvalidCredentials
 	}
