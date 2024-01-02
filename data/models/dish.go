@@ -1,7 +1,7 @@
 package models
 
 type Dish struct {
-	Name  string
-	Foods []Food
-	Dish  []*Dish
+	Name  string  `json:"name"`
+	Foods []Food  `json:"foods"`
+	Dish  []*Dish `json:"dish"`
 }

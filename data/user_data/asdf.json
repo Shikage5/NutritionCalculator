@@ -1,1 +1,129 @@
-{}
+{
+    "Username": "user1",
+    "Foods": [
+        {
+            "Name": "food1",
+            "Energy": 100,
+            "Fat": 10,
+            "SaturatedFattyAcids": 5,
+            "Carbohydrates": 20,
+            "Sugar": 10,
+            "Protein": 15,
+            "Salt": 1,
+            "Fiber": 3,
+            "Water": 50,
+            "ReferenceWeight": 100,
+            "UnitWeight": 100
+        }
+    ],
+    "Dishes": [
+        {
+            "Name": "dish1",
+            "Foods": [
+                {
+                    "Name": "food1",
+                    "Energy": 100,
+                    "Fat": 10,
+                    "SaturatedFattyAcids": 5,
+                    "Carbohydrates": 20,
+                    "Sugar": 10,
+                    "Protein": 15,
+                    "Salt": 1,
+                    "Fiber": 3,
+                    "Water": 50,
+                    "ReferenceWeight": 100,
+                    "UnitWeight": 100
+                }
+            ]
+        }
+    ],
+    "Meals": [
+        {
+            "Name": "meal1",
+            "Foods": [
+                {
+                    "Name": "food1",
+                    "Energy": 100,
+                    "Fat": 10,
+                    "SaturatedFattyAcids": 5,
+                    "Carbohydrates": 20,
+                    "Sugar": 10,
+                    "Protein": 15,
+                    "Salt": 1,
+                    "Fiber": 3,
+                    "Water": 50,
+                    "ReferenceWeight": 100,
+                    "UnitWeight": 100
+                }
+            ],
+            "Dish": [
+                {
+                    "Name": "dish1",
+                    "Foods": [
+                        {
+                            "Name": "food1",
+                            "Energy": 100,
+                            "Fat": 10,
+                            "SaturatedFattyAcids": 5,
+                            "Carbohydrates": 20,
+                            "Sugar": 10,
+                            "Protein": 15,
+                            "Salt": 1,
+                            "Fiber": 3,
+                            "Water": 50,
+                            "ReferenceWeight": 100,
+                            "UnitWeight": 100
+                        }
+                    ]
+                }
+            ]
+        }
+    ],
+    "FoodDiary": [
+        {
+            "Date": "2022-01-01",
+            "Meals": [
+                {
+                    "Name": "meal1",
+                    "Foods": [
+                        {
+                            "Name": "food1",
+                            "Energy": 100,
+                            "Fat": 10,
+                            "SaturatedFattyAcids": 5,
+                            "Carbohydrates": 20,
+                            "Sugar": 10,
+                            "Protein": 15,
+                            "Salt": 1,
+                            "Fiber": 3,
+                            "Water": 50,
+                            "ReferenceWeight": 100,
+                            "UnitWeight": 100
+                        }
+                    ],
+                    "Dish": [
+                        {
+                            "Name": "dish1",
+                            "Foods": [
+                                {
+                                    "Name": "food1",
+                                    "Energy": 100,
+                                    "Fat": 10,
+                                    "SaturatedFattyAcids": 5,
+                                    "Carbohydrates": 20,
+                                    "Sugar": 10,
+                                    "Protein": 15,
+                                    "Salt": 1,
+                                    "Fiber": 3,
+                                    "Water": 50,
+                                    "ReferenceWeight": 100,
+                                    "UnitWeight": 100
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
