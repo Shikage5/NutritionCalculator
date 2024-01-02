@@ -50,6 +50,7 @@ func main() {
 	http.HandleFunc("/", middleware.SessionMiddleware(sessionService, greet))
 	http.HandleFunc("/register", middleware.ValidateUser(validationService, handlers.RegisterHandler(registrationService)))
 	http.HandleFunc("/login", middleware.ValidateUser(validationService, handlers.LoginHandler(authService, sessionService)))
+	http.HandleFunc("/addFood", middleware.SessionMiddleware(sessionService, handlers.AddFoodHandler()))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")
