@@ -21,9 +21,10 @@ type DefaultUserDataService struct {
 }
 
 func (s *DefaultUserDataService) GetUserData(username string) (*models.UserData, error) {
-	data := &models.UserData{}
 
-	err := data.LoadFromFile(s.UserDataPath)
+	data := &models.UserData{Username: username}
+
+	err := data.LoadFromJSONFile(s.UserDataPath)
 	if err != nil {
 		return nil, err
 	}
@@ -31,5 +32,5 @@ func (s *DefaultUserDataService) GetUserData(username string) (*models.UserData,
 }
 
 func (s *DefaultUserDataService) SaveUserData(data *models.UserData, username string) error {
-	return data.SaveToFile(s.UserDataPath)
+	return data.SaveToJSONFile(s.UserDataPath)
 }

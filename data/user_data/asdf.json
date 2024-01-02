@@ -1,125 +1,172 @@
 {
-    "Username": "user1",
-    "Foods": [
+    "username": "asdf",
+    "foods": [
         {
-            "Name": "food1",
-            "Energy": 100,
-            "Fat": 10,
-            "SaturatedFattyAcids": 5,
-            "Carbohydrates": 20,
-            "Sugar": 10,
-            "Protein": 15,
-            "Salt": 1,
-            "Fiber": 3,
-            "Water": 50,
-            "ReferenceWeight": 100,
-            "UnitWeight": 100
+            "name": "food1",
+            "energy": 100,
+            "fat": 10,
+            "saturatedFattyAcids": 5,
+            "carbohydrates": 20,
+            "sugar": 10,
+            "protein": 15,
+            "salt": 1,
+            "fiber": 3,
+            "water": 50,
+            "referenceWeight": 100,
+            "unitWeight": 100
+        },
+        {
+            "name": "food2",
+            "energy": 100,
+            "fat": 10,
+            "saturatedFattyAcids": 5,
+            "carbohydrates": 20,
+            "sugar": 10,
+            "protein": 15,
+            "salt": 1,
+            "fiber": 3,
+            "water": 50,
+            "referenceWeight": 100,
+            "unitWeight": 100
+        },
+        {
+            "name": "apple",
+            "energy": 100,
+            "fat": 10,
+            "saturatedFattyAcids": 5,
+            "carbohydrates": 20,
+            "sugar": 10,
+            "protein": 15,
+            "salt": 1,
+            "fiber": 3,
+            "water": 50,
+            "referenceWeight": 100,
+            "unitWeight": 100
+        },
+        {
+            "name": "adfhadh",
+            "energy": 100,
+            "fat": 10,
+            "saturatedFattyAcids": 5,
+            "carbohydrates": 20,
+            "sugar": 10,
+            "protein": 15,
+            "salt": 1,
+            "fiber": 3,
+            "water": 50,
+            "referenceWeight": 100,
+            "unitWeight": 100
         }
     ],
-    "Dishes": [
+    "dishes": [
         {
-            "Name": "dish1",
-            "Foods": [
+            "name": "dish1",
+            "foods": [
                 {
-                    "Name": "food1",
-                    "Energy": 100,
-                    "Fat": 10,
-                    "SaturatedFattyAcids": 5,
-                    "Carbohydrates": 20,
-                    "Sugar": 10,
-                    "Protein": 15,
-                    "Salt": 1,
-                    "Fiber": 3,
-                    "Water": 50,
-                    "ReferenceWeight": 100,
-                    "UnitWeight": 100
-                }
-            ]
-        }
-    ],
-    "Meals": [
-        {
-            "Name": "meal1",
-            "Foods": [
-                {
-                    "Name": "food1",
-                    "Energy": 100,
-                    "Fat": 10,
-                    "SaturatedFattyAcids": 5,
-                    "Carbohydrates": 20,
-                    "Sugar": 10,
-                    "Protein": 15,
-                    "Salt": 1,
-                    "Fiber": 3,
-                    "Water": 50,
-                    "ReferenceWeight": 100,
-                    "UnitWeight": 100
+                    "name": "food1",
+                    "energy": 100,
+                    "fat": 10,
+                    "saturatedFattyAcids": 5,
+                    "carbohydrates": 20,
+                    "sugar": 10,
+                    "protein": 15,
+                    "salt": 1,
+                    "fiber": 3,
+                    "water": 50,
+                    "referenceWeight": 100,
+                    "unitWeight": 100
                 }
             ],
-            "Dish": [
+            "dish": null
+        }
+    ],
+    "meals": [
+        {
+            "name": "meal1",
+            "foods": [
                 {
-                    "Name": "dish1",
-                    "Foods": [
+                    "name": "food1",
+                    "energy": 100,
+                    "fat": 10,
+                    "saturatedFattyAcids": 5,
+                    "carbohydrates": 20,
+                    "sugar": 10,
+                    "protein": 15,
+                    "salt": 1,
+                    "fiber": 3,
+                    "water": 50,
+                    "referenceWeight": 100,
+                    "unitWeight": 100
+                }
+            ],
+            "dish": [
+                {
+                    "name": "dish1",
+                    "foods": [
                         {
-                            "Name": "food1",
-                            "Energy": 100,
-                            "Fat": 10,
-                            "SaturatedFattyAcids": 5,
-                            "Carbohydrates": 20,
-                            "Sugar": 10,
-                            "Protein": 15,
-                            "Salt": 1,
-                            "Fiber": 3,
-                            "Water": 50,
-                            "ReferenceWeight": 100,
-                            "UnitWeight": 100
+                            "name": "food1",
+                            "energy": 100,
+                            "fat": 10,
+                            "saturatedFattyAcids": 5,
+                            "carbohydrates": 20,
+                            "sugar": 10,
+                            "protein": 15,
+                            "salt": 1,
+                            "fiber": 3,
+                            "water": 50,
+                            "referenceWeight": 100,
+                            "unitWeight": 100
                         }
-                    ]
+                    ],
+                    "dish": null
                 }
             ]
         }
     ],
-    "FoodDiary": [
+    "foodDiary": [
         {
-            "Date": "2022-01-01",
-            "Meals": [
+            "date": "2022-01-01",
+            "foods": null,
+            "dishes": null,
+            "meals": [
                 {
-                    "Name": "meal1",
-                    "Foods": [
+                    "name": "meal1",
+                    "foods": [
                         {
-                            "Name": "food1",
-                            "Energy": 100,
-                            "Fat": 10,
-                            "SaturatedFattyAcids": 5,
-                            "Carbohydrates": 20,
-                            "Sugar": 10,
-                            "Protein": 15,
-                            "Salt": 1,
-                            "Fiber": 3,
-                            "Water": 50,
-                            "ReferenceWeight": 100,
-                            "UnitWeight": 100
+                            "name": "food1",
+                            "energy": 100,
+                            "fat": 10,
+                            "saturatedFattyAcids": 5,
+                            "carbohydrates": 20,
+                            "sugar": 10,
+                            "protein": 15,
+                            "salt": 1,
+                            "fiber": 3,
+                            "water": 50,
+                            "referenceWeight": 100,
+                            "unitWeight": 100
                         }
                     ],
-                    "Dish": [
+                    "dish": [
                         {
-                            "Name": "dish1",
-                            "Foods": [
+                            "name": "dish1",
+                            "foods": [
                                 {
-                                    "Name": "food1",
-                                    "Energy": 100,
-                                    "Fat": 10,
-                                    "SaturatedFattyAcids": 5,
-                                    "Carbohydrates": 20,
-                                    "Sugar": 10,
-                                    "Protein": 15,
-                                    "Salt": 1,
-                                    "Fiber": 3,
-                                    "Water": 50,
-                                    "ReferenceWeight": 100,
-                                    "UnitWeight": 100
+                                    "name": "food1",
+                                    "energy": 100,
+                                    "fat": 10,
+                                    "saturatedFattyAcids": 5,
+                                    "carbohydrates": 20,
+                                    "sugar": 10,
+                                    "protein": 15,
+                                    "salt": 1,
+                                    "fiber": 3,
+                                    "water": 50,
+                                    "referenceWeight": 100,
+                                    "unitWeight": 100
                                 }
-                            ]
+                            ],
+                            "dish": null
                         }
                     ]
                 }

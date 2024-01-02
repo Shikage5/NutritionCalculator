@@ -23,6 +23,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 		if r.Method == http.MethodGet {
 
 			foods := userData.Foods
+
 			//Display the food page
 			tmpl, err := template.ParseFiles("web/template/food.html")
 			if err != nil {
@@ -47,7 +48,15 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Add the food to the user's data
-			userDataService.AddFood(username, food)
+			err = userDataService.AddFood(username, food)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+
+			//Display a message saying the food was added
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Food added!\n"))
 
 			//Display the food page
 
@@ -60,9 +69,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			//Display a message saying the food was added
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Food added!"))
+
 			return
 
 		} else if r.Method == http.MethodPut {
@@ -76,8 +83,15 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Update the food in the user's data
-			userDataService.UpdateFood(username, food)
+			err = userDataService.UpdateFood(username, food)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 
+			//Display a message saying the food was updated
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Food updated!\n"))
 			//Display the food page
 			tmpl, err := template.ParseFiles("web/template/food.html")
 			if err != nil {
@@ -88,9 +102,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			//Display a message saying the food was updated
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Food updated!"))
+
 			return
 
 		} else if r.Method == http.MethodDelete {
@@ -104,8 +116,15 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Delete the food from the user's data
-			userDataService.DeleteFood(username, food)
+			err = userDataService.DeleteFood(username, food)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
 
+			//Display a message saying the food was deleted
+			w.WriteHeader(http.StatusOK)
+			w.Write([]byte("Food deleted!\n"))
 			//Display the food page
 			tmpl, err := template.ParseFiles("web/template/food.html")
 			if err != nil {
@@ -116,10 +135,8 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
-			//Display a message saying the food was deleted
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Food deleted!"))
 
+			return
 		}
 
 	}

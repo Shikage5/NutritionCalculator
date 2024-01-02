@@ -13,7 +13,7 @@ type UserData struct {
 	FoodDiary []Day  `json:"foodDiary"`
 }
 
-func (u *UserData) SaveToFile(userDataPath string) error {
+func (u *UserData) SaveToJSONFile(userDataPath string) error {
 	data, err := json.Marshal(u)
 	if err != nil {
 		return err
@@ -22,7 +22,7 @@ func (u *UserData) SaveToFile(userDataPath string) error {
 	return os.WriteFile(filepath, data, 0644)
 }
 
-func (u *UserData) LoadFromFile(userDataPath string) error {
+func (u *UserData) LoadFromJSONFile(userDataPath string) error {
 	filepath := userDataPath + u.Username + ".json"
 	data, err := os.ReadFile(filepath)
 	if err != nil {
