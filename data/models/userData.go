@@ -2,8 +2,8 @@ package models
 
 type UserData struct {
 	Username  string     `json:"username"`
-	FoodData  []FoodData `json:"foods,omitempty"`
-	DishData  []DishData `json:"dishes,omitempty"`
-	Meals     []Meal     `json:"meals,omitempty"`
+	FoodData  []FoodData `json:"foods"`
+	DishData  []DishData `json:"dishes"`
+	Meals     []Meal     `json:"meals"`
 	FoodDiary []Day      `json:"foodDiary"`
 }

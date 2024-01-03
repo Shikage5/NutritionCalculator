@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"bytes"
 	"context"
@@ -50,7 +51,7 @@ func TestRegisterHandler(t *testing.T) {
 		t.Run(tC.desc, func(t *testing.T) {
 			mockService := &mockRegistrationService{shouldFail: tC.expectedStatusCode == http.StatusInternalServerError}
 
-			var userRequest UserRequest
+			var userRequest models.UserRequest
 			json.Unmarshal(tC.reqBody, &userRequest)
 
 			// Create a context with the UserRequest

@@ -71,7 +71,7 @@ func TestLoginHandler(t *testing.T) {
 			mockAuthService := &mockAuthService{shouldFail: tC.mockAuthShouldFail}
 			mockSessionService := &mockSessionService{shouldFail: tC.mockSessionServiceShouldFail}
 
-			var userRequest UserRequest
+			var userRequest models.UserRequest
 			json.Unmarshal(tC.reqBody, &userRequest)
 
 			// Create a context with the UserRequest
@@ -103,7 +103,7 @@ type mockAuthService struct {
 	shouldFail bool
 }
 
-func (m mockAuthService) Auth(inputUser models.UserCredentials) (bool, error) {
+func (m mockAuthService) Auth(inputUser models.UserRequest) (bool, error) {
 	if m.shouldFail {
 		return false, auth.ErrInvalidCredentials
 	}

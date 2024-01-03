@@ -5,45 +5,64 @@ import (
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/auth"
 	"NutritionCalculator/pkg/services/session"
+	"html/template"
 	"net/http"
 )
 
+type LoginTemplateData struct {
+	ErrMsg string
+}
+
 func LoginHandler(authService auth.AuthService, sessionService session.SessionService) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		var data LoginTemplateData
 		if r.Method == http.MethodPost {
 			// Get the user request from the context
-			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(UserRequest)
+			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(models.UserRequest)
 			if !ok {
 				http.Error(w, "invalid form data", http.StatusBadRequest)
 				return
 			}
-			// Create a userCredentials object
-			userCredentials := models.UserCredentials{Username: userRequest.Username, PasswordHash: userRequest.Password}
 
 			// Authenticate the user
-			authenticated, err := authService.Auth(userCredentials)
+			authenticated, err := authService.Auth(userRequest)
 			if err == auth.ErrInvalidCredentials {
-				http.Error(w, err.Error(), http.StatusUnauthorized)
+				data.ErrMsg = err.Error()
+				displayPage(w, data, "web/template/login.html")
 				return
 			} else if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			} else if !authenticated {
-				http.Error(w, auth.ErrInvalidCredentials.Error(), http.StatusUnauthorized)
+				data.ErrMsg = err.Error()
+				displayPage(w, data, "web/template/login.html")
 				return
 			}
 			// Create a session
-			err = sessionService.CreateSession(userCredentials.Username, w)
+			err = sessionService.CreateSession(userRequest.Username, w)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Login successful"))
+			http.Redirect(w, r, "/", http.StatusSeeOther)
 			return
 		}
 
-		w.Write([]byte("Login form"))
+		//Display the login page template
+		displayPage(w, data, "web/template/login.html")
+		w.WriteHeader(http.StatusOK)
+	}
+}
+
+func displayPage(w http.ResponseWriter, data LoginTemplateData, templatePath string) {
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }

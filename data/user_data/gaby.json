@@ -1,1 +1,27 @@
-{}
+{
+    "username": "gaby",
+    "foods": [
+        {
+            "name": "apple",
+            "nutritionalValues": {
+                "energy": 100,
+                "fat": 0.1,
+                "saturatedFattyAcids": 0.05,
+                "carbohydrates": 25,
+                "sugar": 10,
+                "protein": 2,
+                "salt": 0.01,
+                "fiber": 1.5,
+                "water": 70
+            },
+            "referenceWeight": 100,
+            "measurementUnit": {
+                "name": "Piece",
+                "weight": 250
+            }
+        }
+    ],
+    "dishes": null,
+    "meals": null,
+    "foodDiary": null
+}

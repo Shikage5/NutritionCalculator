@@ -7,8 +7,8 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
-	"NutritionCalculator/pkg/handlers"
 	"NutritionCalculator/pkg/middleware"
 
 	"github.com/stretchr/testify/assert"
@@ -17,13 +17,13 @@ import (
 func TestValidateUser(t *testing.T) {
 	testCases := []struct {
 		desc        string
-		userRequest handlers.UserRequest
+		userRequest models.UserRequest
 		shouldFail  bool
 		status      int
 	}{
 		{
 			desc: "Valid Request",
-			userRequest: handlers.UserRequest{
+			userRequest: models.UserRequest{
 				Username: "john",
 				Password: "secretpassword",
 			},
@@ -32,7 +32,7 @@ func TestValidateUser(t *testing.T) {
 		},
 		{
 			desc: "Invalid Request",
-			userRequest: handlers.UserRequest{
+			userRequest: models.UserRequest{
 				Username: "",
 				Password: "secretpassword",
 			},

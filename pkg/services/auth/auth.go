@@ -9,7 +9,7 @@ import (
 )
 
 type AuthService interface {
-	Auth(inputUser models.UserCredentials) (bool, error)
+	Auth(inputUser models.UserRequest) (bool, error)
 }
 
 type DefaultAuthService struct {
@@ -18,7 +18,7 @@ type DefaultAuthService struct {
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
-func (a DefaultAuthService) Auth(inputUser models.UserCredentials) (bool, error) {
+func (a DefaultAuthService) Auth(inputUser models.UserRequest) (bool, error) {
 	userList, err := utils.ReadUserCredFromJSONFile(a.FilePath)
 	if err != nil {
 		return false, err
@@ -26,7 +26,7 @@ func (a DefaultAuthService) Auth(inputUser models.UserCredentials) (bool, error)
 	for _, u := range userList {
 		if inputUser.Username == u.Username {
 			// User found, check password hash
-			err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(inputUser.PasswordHash))
+			err := bcrypt.CompareHashAndPassword([]byte(u.PasswordHash), []byte(inputUser.Password))
 			if err != nil {
 				return false, ErrInvalidCredentials // Wrong password
 			}

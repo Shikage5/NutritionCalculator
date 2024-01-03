@@ -40,6 +40,7 @@ func (m *DefaultSessionService) CreateSession(username string, w http.ResponseWr
 		MaxAge:   int(sessionDuration.Seconds()),
 		HttpOnly: true,
 		Secure:   true,
+		SameSite: http.SameSiteNoneMode,
 	})
 
 	// Start a goroutine to delete the session data when the session duration is over

@@ -11,7 +11,7 @@ type FoodData struct {
 	Name              string            `json:"name"`
 	NutritionalValues NutritionalValues `json:"nutritionalValues"`
 	ReferenceWeight   float64           `json:"referenceWeight"`
-	MeasurementUnit   MeasurementUnit   `json:"unitWeight"`
+	MeasurementUnit   MeasurementUnit   `json:"measurementUnit"`
 }
 type NutritionalValues struct {
 	Energy              float64 `json:"energy"`

@@ -1,11 +1,10 @@
 package middleware
 
 import (
+	"NutritionCalculator/data/models"
 	contextKeys "NutritionCalculator/pkg/contextKeys"
-	"NutritionCalculator/pkg/handlers"
 	"NutritionCalculator/pkg/services/validation"
 	"context"
-	"encoding/json"
 	"net/http"
 )
 
@@ -13,12 +12,15 @@ import (
 func ValidateUser(validator validation.ValidationService, next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
-			var userRequest handlers.UserRequest
-
-			err := json.NewDecoder(r.Body).Decode(&userRequest)
+			// Decode the request body into a UserRequest struct
+			err := r.ParseForm()
 			if err != nil {
-				http.Error(w, "Invalid request body", http.StatusBadRequest)
+				http.Error(w, "Failed to parse form", http.StatusBadRequest)
 				return
+			}
+			userRequest := models.UserRequest{
+				Username: r.FormValue("username"),
+				Password: r.FormValue("password"),
 			}
 			if !validator.ValidateCredentials(userRequest.Username, userRequest.Password) {
 				http.Error(w, "Username and password are required", http.StatusBadRequest)

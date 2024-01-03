@@ -32,48 +32,48 @@ var mockUserCredentials = []models.UserCredentials{
 func TestAuth(t *testing.T) {
 	testCases := []struct {
 		name     string
-		input    models.UserCredentials
+		input    models.UserRequest
 		hasError bool
 		errMsg   string
 	}{
 		{
 			name:     "user exists, right password",
-			input:    models.UserCredentials{Username: "user1", PasswordHash: "password1"},
+			input:    models.UserRequest{Username: "user1", Password: "password1"},
 			hasError: false,
 		},
 		{
 			name:     "user exists, wrong password",
-			input:    models.UserCredentials{Username: "user1", PasswordHash: "wrongPassword"},
+			input:    models.UserRequest{Username: "user1", Password: "wrongPassword"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "user does not exist",
-			input:    models.UserCredentials{Username: "nonexistentUser", PasswordHash: "password1"},
+			input:    models.UserRequest{Username: "nonexistentUser", Password: "password1"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "empty username and password",
-			input:    models.UserCredentials{Username: "", PasswordHash: ""},
+			input:    models.UserRequest{Username: "", Password: ""},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "empty username, valid password",
-			input:    models.UserCredentials{Username: "", PasswordHash: "password1"},
+			input:    models.UserRequest{Username: "", Password: "password1"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "valid username, empty password",
-			input:    models.UserCredentials{Username: "user1", PasswordHash: ""},
+			input:    models.UserRequest{Username: "user1", Password: ""},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
 		{
 			name:     "nonexistent username, valid password",
-			input:    models.UserCredentials{Username: "nonexistentUser", PasswordHash: "password1"},
+			input:    models.UserRequest{Username: "nonexistentUser", Password: "password1"},
 			hasError: true,
 			errMsg:   "invalid credentials",
 		},
