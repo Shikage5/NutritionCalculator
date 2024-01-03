@@ -2,6 +2,7 @@ package auth
 
 import (
 	"NutritionCalculator/data/models"
+	"NutritionCalculator/utils"
 	"errors"
 
 	"golang.org/x/crypto/bcrypt"
@@ -18,7 +19,7 @@ type DefaultAuthService struct {
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
 func (a DefaultAuthService) Auth(inputUser models.UserCredentials) (bool, error) {
-	userList, err := models.ReadUsersFromJSONFile(a.FilePath)
+	userList, err := utils.ReadUserCredFromJSONFile(a.FilePath)
 	if err != nil {
 		return false, err
 	}

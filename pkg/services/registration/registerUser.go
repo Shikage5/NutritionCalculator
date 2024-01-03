@@ -3,6 +3,7 @@ package registration
 import (
 	"NutritionCalculator/data/models"
 	"NutritionCalculator/pkg/services/hashing"
+	"NutritionCalculator/utils"
 	"encoding/json"
 	"os"
 )
@@ -32,7 +33,7 @@ func (s *DefaultRegistrationService) RegisterUser(username, password string) err
 		PasswordHash: hashedPassword,
 	}
 
-	if err := models.WriteUserInJSONFile(user, s.FilePath); err != nil {
+	if err := utils.WriteUserCredInJSONFile(user, s.FilePath); err != nil {
 		return err
 	}
 	// Create a new user data file

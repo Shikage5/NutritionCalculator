@@ -2,6 +2,7 @@ package auth
 
 import (
 	"NutritionCalculator/data/models"
+	"NutritionCalculator/utils"
 	"os"
 	"testing"
 
@@ -88,7 +89,7 @@ func TestAuth(t *testing.T) {
 
 			// Write mock users to temp file
 			for _, u := range mockUserCredentials {
-				err := models.WriteUserInJSONFile(u, tempFile.Name())
+				err := utils.WriteUserCredInJSONFile(u, tempFile.Name())
 				if err != nil {
 					t.Fatal(err)
 				}
