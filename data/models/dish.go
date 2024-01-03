@@ -13,5 +13,3 @@ type DishData struct {
 	Dish              []Dish            `json:"dish"`
 	NutritionalValues NutritionalValues `json:"nutritionalValues"`
 }
-
-/*============Data Operations=============*/

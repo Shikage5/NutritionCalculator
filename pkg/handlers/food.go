@@ -15,6 +15,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 		//Get user data based on username from context
 		username := r.Context().Value(contextkeys.UserKey).(string)
 
+		/*==========================GET=============================*/
 		if r.Method == http.MethodGet {
 
 			//Get the user's data
@@ -24,19 +25,26 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 				return
 			}
 
-			//Display the food page
-			tmpl, err := template.ParseFiles("web/template/food.html")
+			// //Display the food page
+			// tmpl, err := template.ParseFiles("web/template/food.html")
+			// if err != nil {
+			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+			// 	return
+			// }
+			// err = tmpl.Execute(w, foodData)
+			// if err != nil {
+			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+			// }
+			//Send food data as JSON
+			err = json.NewEncoder(w).Encode(foodData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			err = tmpl.Execute(w, foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
 			w.WriteHeader(http.StatusOK)
 			return
 
+			/*==========================POST=============================*/
 		} else if r.Method == http.MethodPost {
 
 			//Get the food from the request body
@@ -57,6 +65,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Food added!\n"))
 
+			/*==========================PUT=============================*/
 		} else if r.Method == http.MethodPut {
 
 			//Get the food from the request body
@@ -89,6 +98,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			w.Write([]byte("Food updated!\n"))
 			return
 
+			/*==========================DELETE=============================*/
 		} else if r.Method == http.MethodDelete {
 
 			//Get the food from the request body

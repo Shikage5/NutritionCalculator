@@ -73,6 +73,11 @@ func ReadUserDataFromJSONFile(u *models.UserData, userDataPath string) error {
 	if err != nil {
 		return err
 	}
+	if len(data) == 0 {
+		// The JSON file is empty, so initialize 'u' as an empty struct
+		*u = models.UserData{}
+		return nil
+	}
 
 	return json.Unmarshal(data, u)
 }

@@ -2,175 +2,24 @@
     "username": "asdf",
     "foods": [
         {
-            "name": "food1",
-            "energy": 100,
-            "fat": 10,
-            "saturatedFattyAcids": 5,
-            "carbohydrates": 20,
-            "sugar": 10,
-            "protein": 15,
-            "salt": 1,
-            "fiber": 3,
-            "water": 50,
+            "name": "banana",
+            "nutritionalValues": {
+                "energy": 100,
+                "fat": 0.1,
+                "saturatedFattyAcids": 0.05,
+                "carbohydrates": 25,
+                "sugar": 10,
+                "protein": 2,
+                "salt": 0.01,
+                "fiber": 1.5,
+                "water": 70
+            },
             "referenceWeight": 100,
-            "unitWeight": 100
-        },
-        {
-            "name": "food2",
-            "energy": 100,
-            "fat": 10,
-            "saturatedFattyAcids": 5,
-            "carbohydrates": 20,
-            "sugar": 10,
-            "protein": 15,
-            "salt": 1,
-            "fiber": 3,
-            "water": 50,
-            "referenceWeight": 100,
-            "unitWeight": 100
-        },
-        {
-            "name": "apple",
-            "energy": 100,
-            "fat": 10,
-            "saturatedFattyAcids": 5,
-            "carbohydrates": 20,
-            "sugar": 10,
-            "protein": 15,
-            "salt": 1,
-            "fiber": 3,
-            "water": 50,
-            "referenceWeight": 100,
-            "unitWeight": 100
-        },
-        {
-            "name": "adfhadh",
-            "energy": 100,
-            "fat": 10,
-            "saturatedFattyAcids": 5,
-            "carbohydrates": 20,
-            "sugar": 10,
-            "protein": 15,
-            "salt": 1,
-            "fiber": 3,
-            "water": 50,
-            "referenceWeight": 100,
-            "unitWeight": 100
+            "unitWeight": {
+                "name": "",
+                "weight": 0
+            }
         }
     ],
-    "dishes": [
-        {
-            "name": "dish1",
-            "foods": [
-                {
-                    "name": "food1",
-                    "energy": 100,
-                    "fat": 10,
-                    "saturatedFattyAcids": 5,
-                    "carbohydrates": 20,
-                    "sugar": 10,
-                    "protein": 15,
-                    "salt": 1,
-                    "fiber": 3,
-                    "water": 50,
-                    "referenceWeight": 100,
-                    "unitWeight": 100
-                }
-            ],
-            "dish": null
-        }
-    ],
-    "meals": [
-        {
-            "name": "meal1",
-            "foods": [
-                {
-                    "name": "food1",
-                    "energy": 100,
-                    "fat": 10,
-                    "saturatedFattyAcids": 5,
-                    "carbohydrates": 20,
-                    "sugar": 10,
-                    "protein": 15,
-                    "salt": 1,
-                    "fiber": 3,
-                    "water": 50,
-                    "referenceWeight": 100,
-                    "unitWeight": 100
-                }
-            ],
-            "dish": [
-                {
-                    "name": "dish1",
-                    "foods": [
-                        {
-                            "name": "food1",
-                            "energy": 100,
-                            "fat": 10,
-                            "saturatedFattyAcids": 5,
-                            "carbohydrates": 20,
-                            "sugar": 10,
-                            "protein": 15,
-                            "salt": 1,
-                            "fiber": 3,
-                            "water": 50,
-                            "referenceWeight": 100,
-                            "unitWeight": 100
-                        }
-                    ],
-                    "dish": null
-                }
-            ]
-        }
-    ],
-    "foodDiary": [
-        {
-            "date": "2022-01-01",
-            "foods": null,
-            "dishes": null,
-            "meals": [
-                {
-                    "name": "meal1",
-                    "foods": [
-                        {
-                            "name": "food1",
-                            "energy": 100,
-                            "fat": 10,
-                            "saturatedFattyAcids": 5,
-                            "carbohydrates": 20,
-                            "sugar": 10,
-                            "protein": 15,
-                            "salt": 1,
-                            "fiber": 3,
-                            "water": 50,
-                            "referenceWeight": 100,
-                            "unitWeight": 100
-                        }
-                    ],
-                    "dish": [
-                        {
-                            "name": "dish1",
-                            "foods": [
-                                {
-                                    "name": "food1",
-                                    "energy": 100,
-                                    "fat": 10,
-                                    "saturatedFattyAcids": 5,
-                                    "carbohydrates": 20,
-                                    "sugar": 10,
-                                    "protein": 15,
-                                    "salt": 1,
-                                    "fiber": 3,
-                                    "water": 50,
-                                    "referenceWeight": 100,
-                                    "unitWeight": 100
-                                }
-                            ],
-                            "dish": null
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+    "foodDiary": null
 }
