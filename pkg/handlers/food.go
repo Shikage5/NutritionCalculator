@@ -4,6 +4,7 @@ import (
 	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
+	"NutritionCalculator/pkg/services/validation"
 	"encoding/json"
 	"html/template"
 	"net/http"
@@ -25,16 +26,22 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 				return
 			}
 
-			displayPage(w, foodData, "web/template/food.html")
+			displayPage(w, foodData, "web/template/foodData.html")
 			w.WriteHeader(http.StatusOK)
 			return
 
 			/*==========================POST=============================*/
 		} else if r.Method == http.MethodPost {
 
-			//Get the food from the request body
+			//Get the food data from the request body
 			var foodData models.FoodData
 			err := json.NewDecoder(r.Body).Decode(&foodData)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateFoodData(foodData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return

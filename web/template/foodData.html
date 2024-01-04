@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Food Data</title>
+    <style>
+      .hidden {
+        display: none;
+      }
+    </style>
+    <script>
+      window.onload = function () {
+        var foods = document.getElementsByClassName("food");
+        for (var i = 0; i < foods.length; i++) {
+          foods[i].addEventListener("click", function () {
+            var nutritionalValues =
+              this.getElementsByClassName("nutritional-values")[0];
+            if (nutritionalValues.style.display === "none") {
+              nutritionalValues.style.display = "block";
+            } else {
+              nutritionalValues.style.display = "none";
+            }
+          });
+        }
+
+        document
+          .getElementById("foodDataForm")
+          .addEventListener("submit", function (event) {
+            event.preventDefault();
+            var data = {
+              name: document.getElementById("name").value,
+              referenceWeight: parseFloat(
+                document.getElementById("referenceWeight").value
+              ),
+              nutritionalValues: {
+                energy: parseFloat(document.getElementById("energy").value),
+                fat: parseFloat(document.getElementById("fat").value),
+                saturatedFattyAcids: parseFloat(
+                  document.getElementById("saturatedFattyAcids").value
+                ),
+                carbohydrates: parseFloat(
+                  document.getElementById("carbohydrates").value
+                ),
+                sugar: parseFloat(document.getElementById("sugar").value),
+                protein: parseFloat(document.getElementById("protein").value),
+                salt: parseFloat(document.getElementById("salt").value),
+                fiber: parseFloat(document.getElementById("fiber").value),
+                water: parseFloat(document.getElementById("water").value),
+              },
+              measurementUnit: {
+                unitName: document.getElementById("unitName").value,
+                weight: parseFloat(document.getElementById("weight").value),
+              },
+            };
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "/food", true);
+            xhr.setRequestHeader("Content-Type", "application/json");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                  location.reload();
+                } else {
+                    document.getElementById("errorMessage").innerText = xhr.responseText;
+                }
+              }
+            };
+            xhr.send(JSON.stringify(data));
+          });
+      };
+    </script>
+  </head>
+  <body>
+    <h1>Add Food Data</h1>
+    <p id="errorMessage" style="color: red;"></p>
+    <form id="foodDataForm">
+      <h2>Food Data</h2>
+      <label for="name">Name:</label><br />
+      <input type="text" id="name" name="name" /><br />
+      <label for="referenceWeight">Reference Weight:</label><br />
+      <input type="number" id="referenceWeight" name="referenceWeight" /><br />
+      <h2>Nutritional Values</h2>
+      <label for="energy">Energy:</label><br />
+      <input type="number" id="energy" name="energy" /><br />
+      <label for="fat">Fat:</label><br />
+      <input type="number" id="fat" name="fat" /><br />
+      <label for="saturatedFattyAcids">Saturated Fatty Acids:</label><br />
+      <input
+        type="number"
+        id="saturatedFattyAcids"
+        name="saturatedFattyAcids"
+      /><br />
+      <label for="carbohydrates">Carbohydrates:</label><br />
+      <input type="number" id="carbohydrates" name="carbohydrates" /><br />
+      <label for="sugar">Sugar:</label><br />
+      <input type="number" id="sugar" name="sugar" /><br />
+      <label for="protein">Protein:</label><br />
+      <input type="number" id="protein" name="protein" /><br />
+      <label for="salt">Salt:</label><br />
+      <input type="number" id="salt" name="salt" /><br />
+      <label for="fiber">Fiber:</label><br />
+      <input type="number" id="fiber" name="fiber" /><br />
+      <label for="water">Water:</label><br />
+      <input type="number" id="water" name="water" /><br />
+      <h2>Measurement Unit</h2>
+      <label for="unitName">Unit Name:</label><br />
+      <input type="text" id="unitName" name="unitName" /><br />
+      <label for="weight">Weight:</label><br />
+      <input type="number" id="weight" name="weight" /><br />
+      <input type="submit" value="Submit" />
+    </form>
+    <h1>Food Data</h1>
+    <ul>
+      {{range .}}
+      <li class="food">
+        <p>Name: {{.Name}}</p>
+        <div class="nutritional-values hidden">
+          <h2>Nutritional Values</h2>
+          <p>Energy: {{.NutritionalValues.Energy}}</p>
+          <p>Fat: {{.NutritionalValues.Fat}}</p>
+          <p>
+            Saturated Fatty Acids: {{.NutritionalValues.SaturatedFattyAcids}}
+          </p>
+          <p>Carbohydrates: {{.NutritionalValues.Carbohydrates}}</p>
+          <p>Sugar: {{.NutritionalValues.Sugar}}</p>
+          <p>Protein: {{.NutritionalValues.Protein}}</p>
+          <p>Salt: {{.NutritionalValues.Salt}}</p>
+          <p>Fiber: {{.NutritionalValues.Fiber}}</p>
+          <p>Water: {{.NutritionalValues.Water}}</p>
+        </div>
+      </li>
+      {{end}}
+    </ul>
+  </body>
+</html>

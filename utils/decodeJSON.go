@@ -1,11 +1,11 @@
 package utils
 
-import (
-	"encoding/json"
-	"io"
-)
+import "net/http"
 
-func DecodeJSON(body io.Reader, v interface{}) error {
-	decoder := json.NewDecoder(body)
-	return decoder.Decode(v)
+func DecodeFromHTML(r http.Request, v interface{}) error {
+	err := r.ParseForm()
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -1,15 +1,31 @@
-// validation.go
 package validation
 
-// ValidationService is an interface for validation of username and password.
+import (
+	"NutritionCalculator/data/models"
+	"errors"
+	"regexp"
+)
+
 type ValidationService interface {
 	ValidateCredentials(username, password string) bool
+	ValidateFoodData(foodData models.FoodData) error
 }
 
-// CredentialsValidationService is a default implementation of ValidationService.
-type CredentialsValidationService struct{}
+type DefaultValidationService struct{}
 
-// ValidateCredentials checks if the username and password are not empty.
-func (v *CredentialsValidationService) ValidateCredentials(username, password string) bool {
+func (v *DefaultValidationService) ValidateCredentials(username, password string) bool {
 	return username != "" && password != ""
+}
+
+func (v *DefaultValidationService) ValidateFoodData(foodData models.FoodData) error {
+	match, _ := regexp.MatchString("^[a-zA-Z\\s]*$", foodData.Name)
+	if !match {
+		return errors.New("invalid name. Only letters and spaces are allowed")
+	}
+
+	if foodData.ReferenceWeight <= 0 {
+		return errors.New("invalid reference weight. Must be a positive number")
+	}
+
+	return nil
 }

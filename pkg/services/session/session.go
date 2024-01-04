@@ -31,7 +31,7 @@ func (m *DefaultSessionService) CreateSession(username string, w http.ResponseWr
 	m.SessionMap[sessionID] = username
 
 	// Set the session duration
-	sessionDuration := 1 * time.Minute
+	sessionDuration := 24 * time.Hour
 
 	// Set a cookie with the session ID
 	http.SetCookie(w, &http.Cookie{

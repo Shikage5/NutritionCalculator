@@ -33,30 +33,13 @@ func greet(w http.ResponseWriter, r *http.Request) {
 func main() {
 	const userDataPath = "data/user_data/"
 	const credentialsDataPath = "data/userCredentials.json"
-
-	hashingService := &hashing.DefaultHashingService{}
-	registrationService := &registration.DefaultRegistrationService{
-		HashingService: hashingService,
-		FilePath:       credentialsDataPath,
-		UserDataPath:   userDataPath,
-	}
-	validationService := &validation.CredentialsValidationService{}
-	authService := &auth.DefaultAuthService{
-		FilePath: credentialsDataPath,
-	}
-	sessionService := &session.DefaultSessionService{
-		SessionMap: make(map[string]string),
-	}
-	userDataService := &userData.DefaultUserDataService{
-		UserDataPath: userDataPath,
-	}
-
-	http.HandleFunc("/", middleware.SessionMiddleware(sessionService, greet))
-	http.HandleFunc("/register", middleware.ValidateUser(validationService, handlers.RegisterHandler(registrationService)))
-	http.HandleFunc("/login", middleware.ValidateUser(validationService, handlers.LoginHandler(authService, sessionService)))
-	http.HandleFunc("/food", middleware.SessionMiddleware(sessionService, handlers.FoodHandler(userDataService)))
+	s := startServices(userDataPath, credentialsDataPath)
+	http.HandleFunc("/", middleware.SessionMiddleware(s.SessionService, greet))
+	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
+	http.HandleFunc("/login", middleware.ValidateUser(s.ValidationService, handlers.LoginHandler(s.AuthService, s.SessionService)))
+	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler(s.UserDataService)))
 	//ignore this
-	http.HandleFunc("/testUserData", middleware.SessionMiddleware(sessionService, handlers.TestUserData(userDataService)))
+	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData(s.UserDataService)))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")
@@ -74,4 +57,36 @@ func main() {
 	if err != nil {
 		log.Fatal("ListenAndServeTLS: ", err)
 	}
+}
+
+type Services struct {
+	HashingService      *hashing.DefaultHashingService
+	RegistrationService *registration.DefaultRegistrationService
+	ValidationService   *validation.DefaultValidationService
+	AuthService         *auth.DefaultAuthService
+	SessionService      *session.DefaultSessionService
+	UserDataService     *userData.DefaultUserDataService
+}
+
+func startServices(userDataPath, credentialsDataPath string) *Services {
+	HashingService := &hashing.DefaultHashingService{}
+	services := &Services{
+		HashingService: HashingService,
+		RegistrationService: &registration.DefaultRegistrationService{
+			HashingService: HashingService,
+			FilePath:       credentialsDataPath,
+			UserDataPath:   userDataPath,
+		},
+		ValidationService: &validation.DefaultValidationService{},
+		AuthService: &auth.DefaultAuthService{
+			FilePath: credentialsDataPath,
+		},
+		SessionService: &session.DefaultSessionService{
+			SessionMap: make(map[string]string),
+		},
+		UserDataService: &userData.DefaultUserDataService{
+			UserDataPath: userDataPath,
+		},
+	}
+	return services
 }

@@ -81,3 +81,12 @@ func (m *MockValidatorService) ValidateCredentials(username, password string) bo
 		return true
 	}
 }
+
+func (m *MockValidatorService) ValidateFoodData(foodData models.FoodData) error {
+	if m.shouldFail {
+		return assert.AnError
+	} else {
+		return nil
+	}
+
+}
