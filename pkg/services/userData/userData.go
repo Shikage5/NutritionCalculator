@@ -18,9 +18,9 @@ type UserDataService interface {
 	DeleteFoodData(username string, foodData models.FoodData) error
 
 	//Food Operations
-	CalculateFoodNutritionalValues(food models.Food) (models.NutritionalValues, error)
-	CalculateTotalFoodWeight(foods []models.Food) float64
-	CalculateFoodWeight(food models.Food) (float64, error)
+	CalculateFoodNutritionalValues(username string, food models.Food) (models.NutritionalValues, error)
+	CalculateTotalFoodWeight(username string, foods []models.Food) float64
+	CalculateFoodWeight(username string, food models.Food) (float64, error)
 
 	// DishData operations
 	GetDishData(username string) ([]models.DishData, error)
@@ -30,8 +30,8 @@ type UserDataService interface {
 	CalculateDishDataNutritionalValues(username string, dishData models.DishData) (models.NutritionalValues, error)
 	//Dish Operations
 	CalculateDishNutritionalValues(username string, dish models.Dish, processedDishes map[string]bool) (models.NutritionalValues, error)
-	CalculateTotalDishWeight(dishes []models.Dish) float64
-	CalculateDishWeight(dish models.Dish) (float64, error)
+	CalculateTotalDishWeight(username string, dishes []models.Dish) float64
+	CalculateDishWeight(username string, dish models.Dish) (float64, error)
 	// Meal operations
 
 }

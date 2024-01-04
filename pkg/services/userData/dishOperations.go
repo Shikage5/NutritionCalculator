@@ -3,13 +3,14 @@ package userData
 import (
 	"NutritionCalculator/data/models"
 	"fmt"
+	"log"
 )
 
 func (s *DefaultUserDataService) CalculateDishNutritionalValues(username string, dish models.Dish, processedDishes map[string]bool) (models.NutritionalValues, error) {
 	var totalDishNutritionalValues models.NutritionalValues
 
 	if processedDishes[dish.Name] {
-		return models.NutritionalValues{}, fmt.Errorf("Circular reference detected with dish: %s", dish.Name)
+		return models.NutritionalValues{}, fmt.Errorf("circular reference detected with dish: %s", dish.Name)
 	}
 
 	processedDishes[dish.Name] = true
@@ -21,9 +22,9 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(username string,
 
 	/*==========================Add Nutritional Values of all Foods=============================*/
 
-	totalFoodWeight := s.CalculateTotalFoodWeight(dishData.Foods)
+	totalFoodWeight := s.CalculateTotalFoodWeight(username, dishData.Foods)
 	for _, food := range dishData.Foods {
-		foodWeight, err := s.CalculateFoodWeight(food)
+		foodWeight, err := s.CalculateFoodWeight(username, food)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
@@ -46,10 +47,10 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(username string,
 
 	/*==========================Add Nutritional Values of all Dishes=============================*/
 
-	totalDishWeight := s.CalculateTotalDishWeight(dishData.Dishes)
+	totalDishWeight := s.CalculateTotalDishWeight(username, dishData.Dishes)
 
 	for _, dish := range dishData.Dishes {
-		dishWeight, err := s.CalculateDishWeight(dish)
+		dishWeight, err := s.CalculateDishWeight(username, dish)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
@@ -73,11 +74,12 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(username string,
 	return totalDishNutritionalValues, nil
 }
 
-func (s *DefaultUserDataService) CalculateTotalDishWeight(dishes []models.Dish) float64 {
+func (s *DefaultUserDataService) CalculateTotalDishWeight(username string, dishes []models.Dish) float64 {
 	var totalDishWeight float64
 	for _, dish := range dishes {
-		dishWeight, err := s.CalculateDishWeight(dish)
+		dishWeight, err := s.CalculateDishWeight(username, dish)
 		if err != nil {
+			log.Println(err)
 			continue
 		}
 		totalDishWeight += dishWeight
@@ -85,18 +87,18 @@ func (s *DefaultUserDataService) CalculateTotalDishWeight(dishes []models.Dish) 
 	return totalDishWeight
 }
 
-func (s *DefaultUserDataService) CalculateDishWeight(dish models.Dish) (float64, error) {
+func (s *DefaultUserDataService) CalculateDishWeight(username string, dish models.Dish) (float64, error) {
 
 	if dish.Weight != nil {
 		return *dish.Weight, nil
 	} else if dish.Quantity != nil {
 		var totalDishWeight float64
-		dishData, err := s.GetDishDataByName("default", dish.Name)
+		dishData, err := s.GetDishDataByName(username, dish.Name)
 		if err != nil {
 			return 0, err
 		}
-		totalDishWeight += s.CalculateTotalFoodWeight(dishData.Foods)
-		totalDishWeight += s.CalculateTotalDishWeight(dishData.Dishes)
+		totalDishWeight += s.CalculateTotalFoodWeight(username, dishData.Foods)
+		totalDishWeight += s.CalculateTotalDishWeight(username, dishData.Dishes)
 
 		return *dish.Quantity * totalDishWeight, nil
 	}

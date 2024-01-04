@@ -43,10 +43,10 @@ func (s *DefaultUserDataService) CalculateFoodNutritionalValues(username string,
 	return models.NutritionalValues{}, fmt.Errorf("no weight or quantity specified for food %s", food.Name)
 }
 
-func (s *DefaultUserDataService) CalculateTotalFoodWeight(foods []models.Food) float64 {
+func (s *DefaultUserDataService) CalculateTotalFoodWeight(username string, foods []models.Food) float64 {
 	var totalFoodWeight float64
 	for _, food := range foods {
-		foodWeight, err := s.CalculateFoodWeight(food)
+		foodWeight, err := s.CalculateFoodWeight(username, food)
 		if err != nil {
 			continue
 		}
@@ -54,11 +54,11 @@ func (s *DefaultUserDataService) CalculateTotalFoodWeight(foods []models.Food) f
 	}
 	return totalFoodWeight
 }
-func (s *DefaultUserDataService) CalculateFoodWeight(food models.Food) (float64, error) {
+func (s *DefaultUserDataService) CalculateFoodWeight(username string, food models.Food) (float64, error) {
 	if food.Weight != nil {
 		return *food.Weight, nil
 	} else if food.Quantity != nil {
-		foodData, err := s.GetFoodDataByName("default", food.Name)
+		foodData, err := s.GetFoodDataByName(username, food.Name)
 		if err != nil {
 			return 0, err
 		}
