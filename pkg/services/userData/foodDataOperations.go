@@ -33,14 +33,14 @@ func (s *DefaultUserDataService) AddFoodData(username string, foodData models.Fo
 }
 
 // UpdateFood updates a food in the user's data
-func (s *DefaultUserDataService) UpdateFoodData(username string, food models.FoodData) error {
+func (s *DefaultUserDataService) UpdateFoodData(username string, foodData models.FoodData) error {
 	savedData, err := s.GetUserData(username)
 	if err != nil {
 		return err
 	}
 	for i, f := range savedData.FoodData {
-		if f.Name == food.Name {
-			savedData.FoodData[i] = food
+		if f.Name == foodData.Name {
+			savedData.FoodData[i] = foodData
 			break
 		} else if i == len(savedData.FoodData)-1 {
 			return ErrFoodNotFound
@@ -50,13 +50,13 @@ func (s *DefaultUserDataService) UpdateFoodData(username string, food models.Foo
 }
 
 // DeleteFood deletes a food from the user's data
-func (s *DefaultUserDataService) DeleteFoodData(username string, food models.FoodData) error {
+func (s *DefaultUserDataService) DeleteFoodData(username string, foodData models.FoodData) error {
 	savedData, err := s.GetUserData(username)
 	if err != nil {
 		return err
 	}
 	for i, f := range savedData.FoodData {
-		if f.Name == food.Name {
+		if f.Name == foodData.Name {
 			savedData.FoodData = append(savedData.FoodData[:i], savedData.FoodData[i+1:]...)
 			break
 		} else if i == len(savedData.FoodData)-1 {
@@ -64,4 +64,16 @@ func (s *DefaultUserDataService) DeleteFoodData(username string, food models.Foo
 		}
 	}
 	return s.SaveUserData(savedData, username)
+}
+func (s *DefaultUserDataService) GetFoodDataByName(username string, foodName string) (models.FoodData, error) {
+	savedData, err := s.GetUserData(username)
+	if err != nil {
+		return models.FoodData{}, err
+	}
+	for _, f := range savedData.FoodData {
+		if f.Name == foodName {
+			return f, nil
+		}
+	}
+	return models.FoodData{}, ErrFoodNotFound
 }

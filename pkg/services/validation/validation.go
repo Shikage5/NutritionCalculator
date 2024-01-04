@@ -27,3 +27,12 @@ func (v *DefaultValidationService) ValidateFoodData(foodData models.FoodData) er
 
 	return nil
 }
+
+func (v *DefaultValidationService) ValidateDishData(dishData models.DishData) error {
+	match, _ := regexp.MatchString("^[a-zA-Z\\s]*$", dishData.Name)
+	if !match {
+		return errors.New("name must only contain letters and spaces")
+	}
+
+	return nil
+}

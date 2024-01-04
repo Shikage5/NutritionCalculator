@@ -2,8 +2,8 @@ package models
 
 type Food struct {
 	Name              string            `json:"name"`
-	Quantity          float64           `json:"quantity"`
-	Weight            float64           `json:"weight"`
+	Quantity          *float64          `json:"quantity"`
+	Weight            *float64          `json:"weight"`
 	NutritionalValues NutritionalValues `json:"nutritionalValues"`
 }
 

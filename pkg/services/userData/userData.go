@@ -11,16 +11,22 @@ type UserDataService interface {
 	// User operations
 	GetUserData(username string) (models.UserData, error)
 	SaveUserData(userData models.UserData, username string) error
-	// Food operations
+	// FoodData operations
 	GetFoodData(username string) ([]models.FoodData, error)
-	AddFoodData(username string, food models.FoodData) error
-	UpdateFoodData(username string, food models.FoodData) error
-	DeleteFoodData(username string, food models.FoodData) error
-	// Dish operations
+	AddFoodData(username string, foodData models.FoodData) error
+	UpdateFoodData(username string, foodData models.FoodData) error
+	DeleteFoodData(username string, foodData models.FoodData) error
+
+	//Food Operations
+	CalculateFoodNutritionalValues(food models.Food) (models.NutritionalValues, error)
+
+	// DishData operations
 	GetDishData(username string) ([]models.DishData, error)
-	AddDishData(username string, dish models.DishData) error
-	UpdateDishData(username string, dish models.DishData) error
-	DeleteDishData(username string, dish models.DishData) error
+	AddDishData(username string, dishData models.DishData) error
+	UpdateDishData(username string, dishData models.DishData) error
+	DeleteDishData(username string, dishData models.DishData) error
+	//Dish Operations
+	CalculateDishNutritionalValues(dish models.Dish) (models.NutritionalValues, error)
 	// Meal operations
 
 }
