@@ -23,7 +23,7 @@ func SessionMiddleware(sessionService session.SessionService, next http.HandlerF
 		username, ok := sessionService.GetSession(sessionID)
 		if !ok {
 			// If the session ID is not in the session map, redirect to the login page
-			http.Redirect(w, r, "/login", http.StatusUnauthorized)
+			http.Redirect(w, r, "/login", http.StatusSeeOther)
 			return
 		}
 

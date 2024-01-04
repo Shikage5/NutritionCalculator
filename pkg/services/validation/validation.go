@@ -18,13 +18,11 @@ func (v *DefaultValidationService) ValidateCredentials(username, password string
 }
 
 func (v *DefaultValidationService) ValidateFoodData(foodData models.FoodData) error {
+	//if food data is not fully complete, return an error
+
 	match, _ := regexp.MatchString("^[a-zA-Z\\s]*$", foodData.Name)
 	if !match {
-		return errors.New("invalid name. Only letters and spaces are allowed")
-	}
-
-	if foodData.ReferenceWeight <= 0 {
-		return errors.New("invalid reference weight. Must be a positive number")
+		return errors.New("name must only contain letters and spaces")
 	}
 
 	return nil

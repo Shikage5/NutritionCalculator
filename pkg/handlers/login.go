@@ -28,14 +28,14 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 			authenticated, err := authService.Auth(userRequest)
 			if err == auth.ErrInvalidCredentials {
 				data.ErrMsg = err.Error()
-				displayPage(w, data, "web/template/login.html")
+				DisplayPage(w, data, "web/template/login.html")
 				return
 			} else if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			} else if !authenticated {
 				data.ErrMsg = err.Error()
-				displayPage(w, data, "web/template/login.html")
+				DisplayPage(w, data, "web/template/login.html")
 				return
 			}
 			// Create a session
@@ -50,12 +50,12 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 		}
 
 		//Display the login page template
-		displayPage(w, data, "web/template/login.html")
+		DisplayPage(w, data, "web/template/login.html")
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
-func displayPage(w http.ResponseWriter, data any, templatePath string) {
+func DisplayPage(w http.ResponseWriter, data any, templatePath string) {
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

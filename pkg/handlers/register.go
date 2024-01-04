@@ -4,7 +4,6 @@ import (
 	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/registration"
-	"fmt"
 	"net/http"
 )
 
@@ -13,7 +12,7 @@ func RegisterHandler(registrationService registration.RegistrationService) http.
 		if r.Method == http.MethodPost {
 			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(models.UserRequest)
 			if !ok {
-				http.Error(w, "Registration fail form", http.StatusBadRequest)
+				http.Error(w, "Registration failed", http.StatusBadRequest)
 				return
 			}
 			err := registrationService.RegisterUser(userRequest.Username, userRequest.Password)
@@ -27,6 +26,6 @@ func RegisterHandler(registrationService registration.RegistrationService) http.
 			return
 		}
 
-		fmt.Fprintf(w, "Registration form")
+		DisplayPage(w, nil, "web/template/register.html")
 	}
 }

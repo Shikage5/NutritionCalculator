@@ -7,6 +7,7 @@ import (
 	"NutritionCalculator/pkg/services/validation"
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -26,7 +27,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 				return
 			}
 
-			displayPage(w, foodData, "web/template/foodData.html")
+			DisplayPage(w, foodData, "web/template/foodData.html")
 			w.WriteHeader(http.StatusOK)
 			return
 
@@ -43,7 +44,8 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			valiationService := &validation.DefaultValidationService{}
 			err = valiationService.ValidateFoodData(foodData)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 

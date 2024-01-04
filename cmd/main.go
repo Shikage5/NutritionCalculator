@@ -10,24 +10,15 @@ import (
 	"NutritionCalculator/pkg/services/session"
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
-	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
 )
 
 func greet(w http.ResponseWriter, r *http.Request) {
-	tmpl, err := template.ParseFiles("web/template/greet.html")
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 
 	user := r.Context().Value(contextkeys.UserKey)
-	err = tmpl.Execute(w, user)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	handlers.DisplayPage(w, user, "web/template/greet.html")
 }
 
 func main() {
