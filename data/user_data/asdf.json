@@ -1,6 +1,6 @@
 {
     "username": "asdf",
-    "foods": [
+    "foodData": [
         {
             "name": "banana",
             "nutritionalValues": {

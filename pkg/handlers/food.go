@@ -25,22 +25,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 				return
 			}
 
-			// //Display the food page
-			// tmpl, err := template.ParseFiles("web/template/food.html")
-			// if err != nil {
-			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-			// 	return
-			// }
-			// err = tmpl.Execute(w, foodData)
-			// if err != nil {
-			// 	http.Error(w, err.Error(), http.StatusInternalServerError)
-			// }
-			//Send food data as JSON
-			err = json.NewEncoder(w).Encode(foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+			displayPage(w, foodData, "web/template/food.html")
 			w.WriteHeader(http.StatusOK)
 			return
 

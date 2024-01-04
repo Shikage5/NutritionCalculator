@@ -55,7 +55,7 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 	}
 }
 
-func displayPage(w http.ResponseWriter, data LoginTemplateData, templatePath string) {
+func displayPage(w http.ResponseWriter, data any, templatePath string) {
 	tmpl, err := template.ParseFiles(templatePath)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

@@ -1,6 +1,6 @@
 {
     "username": "gaby",
-    "foods": [
+    "foodData": [
         {
             "name": "apple",
             "nutritionalValues": {
@@ -21,7 +21,7 @@
             }
         }
     ],
-    "dishes": null,
+    "dishData": null,
     "meals": null,
     "foodDiary": null
 }
