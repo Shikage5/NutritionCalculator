@@ -8,8 +8,8 @@ import (
 var ErrDishAlreadyExists = errors.New("dish already exists")
 var ErrDishNotFound = errors.New("dish not found")
 
-func (s *DefaultUserDataService) GetDishData(username string) ([]models.DishData, error) {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) GetDishData() ([]models.DishData, error) {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return nil, err
 	}
@@ -18,8 +18,8 @@ func (s *DefaultUserDataService) GetDishData(username string) ([]models.DishData
 }
 
 // AddDish adds a dish to the user's data
-func (s *DefaultUserDataService) AddDishData(username string, dishData models.DishData) error {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) AddDishData(dishData models.DishData) error {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
@@ -29,11 +29,11 @@ func (s *DefaultUserDataService) AddDishData(username string, dishData models.Di
 		}
 	}
 	savedData.DishData = append(savedData.DishData, dishData)
-	return s.SaveUserData(savedData, username)
+	return s.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) UpdateDishData(username string, dishData models.DishData) error {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) UpdateDishData(dishData models.DishData) error {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
@@ -45,11 +45,11 @@ func (s *DefaultUserDataService) UpdateDishData(username string, dishData models
 			return ErrDishNotFound
 		}
 	}
-	return s.SaveUserData(savedData, username)
+	return s.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) DeleteDishData(username string, dishData models.DishData) error {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) DeleteDishData(dishData models.DishData) error {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
@@ -61,11 +61,11 @@ func (s *DefaultUserDataService) DeleteDishData(username string, dishData models
 			return ErrDishNotFound
 		}
 	}
-	return s.SaveUserData(savedData, username)
+	return s.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) GetDishDataByName(username, name string) (models.DishData, error) {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) GetDishDataByName(name string) (models.DishData, error) {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return models.DishData{}, err
 	}
@@ -77,9 +77,9 @@ func (s *DefaultUserDataService) GetDishDataByName(username, name string) (model
 	return models.DishData{}, ErrDishNotFound
 }
 
-func (s *DefaultUserDataService) CalculateDishDataNutritionalValues(username string, dishData models.DishData) (models.NutritionalValues, error) {
+func (s *DefaultUserDataService) CalculateDishDataNutritionalValues(dishData models.DishData) (models.NutritionalValues, error) {
 	for _, food := range dishData.Foods {
-		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(username, food)
+		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
@@ -94,7 +94,7 @@ func (s *DefaultUserDataService) CalculateDishDataNutritionalValues(username str
 		dishData.NutritionalValues.Water += foodNutritionalValues.Water
 	}
 	for _, dish := range dishData.Dishes {
-		dishNutritionalValues, err := s.CalculateDishNutritionalValues(username, dish, make(map[string]bool))
+		dishNutritionalValues, err := s.CalculateDishNutritionalValues(dish, make(map[string]bool))
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}

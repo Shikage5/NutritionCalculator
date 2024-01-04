@@ -11,17 +11,18 @@ import (
 	"net/http"
 )
 
-func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
+func FoodHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		//Get user data based on username from context
-		username := r.Context().Value(contextkeys.UserKey).(string)
 
+		username := r.Context().Value(contextkeys.UserKey).(string)
+		userDataService := userData.NewUserDataService(username)
 		/*==========================GET=============================*/
 		if r.Method == http.MethodGet {
 
 			//Get the user's data
-			foodData, err := userDataService.GetFoodData(username)
+			foodData, err := userDataService.GetFoodData()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -50,7 +51,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Add the food to the user's data
-			err = userDataService.AddFoodData(username, foodData)
+			err = userDataService.AddFoodData(foodData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -71,7 +72,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Update the food in the user's data
-			err = userDataService.UpdateFoodData(username, foodData)
+			err = userDataService.UpdateFoodData(foodData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -104,7 +105,7 @@ func FoodHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Delete the food from the user's data
-			err = userDataService.DeleteFoodData(username, foodData)
+			err = userDataService.DeleteFoodData(foodData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

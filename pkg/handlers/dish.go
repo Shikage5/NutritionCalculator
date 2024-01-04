@@ -11,17 +11,18 @@ import (
 	"net/http"
 )
 
-func DishHandler(userDataService userData.UserDataService) http.HandlerFunc {
+func DishHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		//Get user data based on username from context
 		username := r.Context().Value(contextkeys.UserKey).(string)
+		userDataService := userData.NewUserDataService(username)
 
 		/*==========================GET=============================*/
 		if r.Method == http.MethodGet {
 
 			//Get the user's data
-			dishData, err := userDataService.GetDishData(username)
+			dishData, err := userDataService.GetDishData()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -50,14 +51,14 @@ func DishHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Calculate the dish's nutrition
-			dishData.NutritionalValues, err = userDataService.CalculateDishDataNutritionalValues(username, dishData)
+			dishData.NutritionalValues, err = userDataService.CalculateDishDataNutritionalValues(dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			//Add the dish to the user's data
-			err = userDataService.AddDishData(username, dishData)
+			err = userDataService.AddDishData(dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -78,7 +79,7 @@ func DishHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Update the dish in the user's data
-			err = userDataService.UpdateDishData(username, dishData)
+			err = userDataService.UpdateDishData(dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
@@ -111,7 +112,7 @@ func DishHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Delete the dish from the user's data
-			err = userDataService.DeleteDishData(username, dishData)
+			err = userDataService.DeleteDishData(dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

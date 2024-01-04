@@ -9,40 +9,45 @@ import (
 
 type UserDataService interface {
 	// User operations
-	GetUserData(username string) (models.UserData, error)
-	SaveUserData(userData models.UserData, username string) error
+	GetUserData() (models.UserData, error)
+	SaveUserData(userData models.UserData) error
 	// FoodData operations
-	GetFoodData(username string) ([]models.FoodData, error)
-	AddFoodData(username string, foodData models.FoodData) error
-	UpdateFoodData(username string, foodData models.FoodData) error
-	DeleteFoodData(username string, foodData models.FoodData) error
+	GetFoodData() ([]models.FoodData, error)
+	AddFoodData(foodData models.FoodData) error
+	UpdateFoodData(foodData models.FoodData) error
+	DeleteFoodData(foodData models.FoodData) error
 
 	//Food Operations
-	CalculateFoodNutritionalValues(username string, food models.Food) (models.NutritionalValues, error)
-	CalculateTotalFoodWeight(username string, foods []models.Food) float64
-	CalculateFoodWeight(username string, food models.Food) (float64, error)
+	CalculateFoodNutritionalValues(food models.Food) (models.NutritionalValues, error)
+	CalculateTotalFoodWeight(foods []models.Food) float64
+	CalculateFoodWeight(food models.Food) (float64, error)
 
 	// DishData operations
-	GetDishData(username string) ([]models.DishData, error)
-	AddDishData(username string, dishData models.DishData) error
-	UpdateDishData(username string, dishData models.DishData) error
-	DeleteDishData(username string, dishData models.DishData) error
-	CalculateDishDataNutritionalValues(username string, dishData models.DishData) (models.NutritionalValues, error)
+	GetDishData() ([]models.DishData, error)
+	AddDishData(dishData models.DishData) error
+	UpdateDishData(dishData models.DishData) error
+	DeleteDishData(dishData models.DishData) error
+	CalculateDishDataNutritionalValues(dishData models.DishData) (models.NutritionalValues, error)
 	//Dish Operations
-	CalculateDishNutritionalValues(username string, dish models.Dish, processedDishes map[string]bool) (models.NutritionalValues, error)
-	CalculateTotalDishWeight(username string, dishes []models.Dish) float64
-	CalculateDishWeight(username string, dish models.Dish) (float64, error)
+	CalculateDishNutritionalValues(dish models.Dish, processedDishes map[string]bool) (models.NutritionalValues, error)
+	CalculateTotalDishWeight(dishes []models.Dish) float64
+	CalculateDishWeight(dish models.Dish) (float64, error)
 	// Meal operations
 
 }
 
 type DefaultUserDataService struct {
 	UserDataPath string
+	Username     string
 }
 
-func (s *DefaultUserDataService) GetUserData(username string) (models.UserData, error) {
+func NewUserDataService(username string) *DefaultUserDataService {
+	return &DefaultUserDataService{Username: username}
+}
+
+func (s *DefaultUserDataService) GetUserData() (models.UserData, error) {
 	var userData models.UserData
-	userData.Username = username
+	userData.Username = s.Username
 	err := utils.ReadUserDataFromJSONFile(&userData, s.UserDataPath)
 	if err != nil {
 		return models.UserData{}, err
@@ -50,7 +55,7 @@ func (s *DefaultUserDataService) GetUserData(username string) (models.UserData, 
 	return userData, err
 }
 
-func (s *DefaultUserDataService) SaveUserData(userData models.UserData, username string) error {
+func (s *DefaultUserDataService) SaveUserData(userData models.UserData) error {
 	err := utils.WriteUserDataToJSONFile(&userData, s.UserDataPath)
 	if err != nil {
 		return err

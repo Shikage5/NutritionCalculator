@@ -8,7 +8,6 @@ import (
 	"NutritionCalculator/pkg/services/hashing"
 	"NutritionCalculator/pkg/services/registration"
 	"NutritionCalculator/pkg/services/session"
-	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
 	"log"
 	"net/http"
@@ -28,9 +27,9 @@ func main() {
 	http.HandleFunc("/", middleware.SessionMiddleware(s.SessionService, greet))
 	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
 	http.HandleFunc("/login", middleware.ValidateUser(s.ValidationService, handlers.LoginHandler(s.AuthService, s.SessionService)))
-	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler(s.UserDataService)))
+	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler()))
 	//ignore this
-	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData(s.UserDataService)))
+	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData()))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")
@@ -56,7 +55,6 @@ type Services struct {
 	ValidationService   *validation.DefaultValidationService
 	AuthService         *auth.DefaultAuthService
 	SessionService      *session.DefaultSessionService
-	UserDataService     *userData.DefaultUserDataService
 }
 
 func startServices(userDataPath, credentialsDataPath string) *Services {
@@ -74,9 +72,6 @@ func startServices(userDataPath, credentialsDataPath string) *Services {
 		},
 		SessionService: &session.DefaultSessionService{
 			SessionMap: make(map[string]string),
-		},
-		UserDataService: &userData.DefaultUserDataService{
-			UserDataPath: userDataPath,
 		},
 	}
 	return services

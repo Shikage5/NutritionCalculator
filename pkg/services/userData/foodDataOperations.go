@@ -9,8 +9,8 @@ var ErrFoodAlreadyExists = errors.New("food already exists")
 var ErrFoodNotFound = errors.New("food not found")
 
 // GetFoodData gets the user's food data
-func (s *DefaultUserDataService) GetFoodData(username string) ([]models.FoodData, error) {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) GetFoodData() ([]models.FoodData, error) {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return nil, err
 	}
@@ -18,8 +18,8 @@ func (s *DefaultUserDataService) GetFoodData(username string) ([]models.FoodData
 }
 
 // AddFood adds a food to the user's data
-func (s *DefaultUserDataService) AddFoodData(username string, foodData models.FoodData) error {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) AddFoodData(foodData models.FoodData) error {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
@@ -29,12 +29,12 @@ func (s *DefaultUserDataService) AddFoodData(username string, foodData models.Fo
 		}
 	}
 	savedData.FoodData = append(savedData.FoodData, foodData)
-	return s.SaveUserData(savedData, username)
+	return s.SaveUserData(savedData)
 }
 
 // UpdateFood updates a food in the user's data
-func (s *DefaultUserDataService) UpdateFoodData(username string, foodData models.FoodData) error {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) UpdateFoodData(foodData models.FoodData) error {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
@@ -46,12 +46,12 @@ func (s *DefaultUserDataService) UpdateFoodData(username string, foodData models
 			return ErrFoodNotFound
 		}
 	}
-	return s.SaveUserData(savedData, username)
+	return s.SaveUserData(savedData)
 }
 
 // DeleteFood deletes a food from the user's data
-func (s *DefaultUserDataService) DeleteFoodData(username string, foodData models.FoodData) error {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) DeleteFoodData(foodData models.FoodData) error {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
@@ -63,10 +63,10 @@ func (s *DefaultUserDataService) DeleteFoodData(username string, foodData models
 			return ErrFoodNotFound
 		}
 	}
-	return s.SaveUserData(savedData, username)
+	return s.SaveUserData(savedData)
 }
-func (s *DefaultUserDataService) GetFoodDataByName(username string, foodName string) (models.FoodData, error) {
-	savedData, err := s.GetUserData(username)
+func (s *DefaultUserDataService) GetFoodDataByName(foodName string) (models.FoodData, error) {
+	savedData, err := s.GetUserData()
 	if err != nil {
 		return models.FoodData{}, err
 	}
