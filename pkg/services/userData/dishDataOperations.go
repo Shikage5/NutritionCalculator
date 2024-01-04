@@ -76,3 +76,38 @@ func (s *DefaultUserDataService) GetDishDataByName(username, name string) (model
 	}
 	return models.DishData{}, ErrDishNotFound
 }
+
+func (s *DefaultUserDataService) CalculateDishDataNutritionalValues(username string, dishData models.DishData) (models.NutritionalValues, error) {
+	for _, food := range dishData.Foods {
+		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(username, food)
+		if err != nil {
+			return models.NutritionalValues{}, err
+		}
+		dishData.NutritionalValues.Carbohydrates += foodNutritionalValues.Carbohydrates
+		dishData.NutritionalValues.Energy += foodNutritionalValues.Energy
+		dishData.NutritionalValues.Fat += foodNutritionalValues.Fat
+		dishData.NutritionalValues.Fiber += foodNutritionalValues.Fiber
+		dishData.NutritionalValues.Protein += foodNutritionalValues.Protein
+		dishData.NutritionalValues.Salt += foodNutritionalValues.Salt
+		dishData.NutritionalValues.SaturatedFattyAcids += foodNutritionalValues.SaturatedFattyAcids
+		dishData.NutritionalValues.Sugar += foodNutritionalValues.Sugar
+		dishData.NutritionalValues.Water += foodNutritionalValues.Water
+	}
+	for _, dish := range dishData.Dishes {
+		dishNutritionalValues, err := s.CalculateDishNutritionalValues(username, dish, make(map[string]bool))
+		if err != nil {
+			return models.NutritionalValues{}, err
+		}
+		dishData.NutritionalValues.Carbohydrates += dishNutritionalValues.Carbohydrates
+		dishData.NutritionalValues.Energy += dishNutritionalValues.Energy
+		dishData.NutritionalValues.Fat += dishNutritionalValues.Fat
+		dishData.NutritionalValues.Fiber += dishNutritionalValues.Fiber
+		dishData.NutritionalValues.Protein += dishNutritionalValues.Protein
+		dishData.NutritionalValues.Salt += dishNutritionalValues.Salt
+		dishData.NutritionalValues.SaturatedFattyAcids += dishNutritionalValues.SaturatedFattyAcids
+		dishData.NutritionalValues.Sugar += dishNutritionalValues.Sugar
+		dishData.NutritionalValues.Water += dishNutritionalValues.Water
+	}
+
+	return dishData.NutritionalValues, nil
+}

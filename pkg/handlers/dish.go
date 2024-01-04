@@ -50,7 +50,7 @@ func DishHandler(userDataService userData.UserDataService) http.HandlerFunc {
 			}
 
 			//Calculate the dish's nutrition
-			dishData.NutritionalValues, err = userDataService.CalculateDishNutritionalValues(username, dishData)
+			dishData.NutritionalValues, err = userDataService.CalculateDishDataNutritionalValues(username, dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
