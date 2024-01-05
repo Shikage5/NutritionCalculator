@@ -77,23 +77,27 @@ func DishHandler(userDataPath string) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateDishData(dishData)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
+				return
+			}
+
+			//calculate the dish's nutrition
+			nutritionalValues, err := userDataService.CalculateDishDataNutritionalValues(dishData)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			dishData.NutritionalValues = &nutritionalValues
 
 			//Update the dish in the user's data
 			err = userDataService.UpdateDishData(dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
-			}
-
-			//Display the dish page
-			tmpl, err := template.ParseFiles("web/template/dish.html")
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			err = tmpl.Execute(w, dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
 			}
 			//Display a message saying the dish was updated
 			w.WriteHeader(http.StatusOK)

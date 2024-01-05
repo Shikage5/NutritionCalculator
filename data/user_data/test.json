@@ -19,15 +19,67 @@
                 "name": "",
                 "weight": 100
             }
+        },
+        {
+            "name": "apple",
+            "nutritionalValues": {
+                "energy": 52,
+                "fat": 0.2,
+                "saturatedFattyAcids": 0.03,
+                "carbohydrates": 13.8,
+                "sugar": 10.4,
+                "protein": 0.3,
+                "salt": 0.01,
+                "fiber": 2.4,
+                "water": 85.56
+            },
+            "referenceWeight": 100,
+            "measurementUnit": {
+                "name": "",
+                "weight": 100
+            }
         }
     ],
     "dishData": [
         {
             "name": "applejuice",
+            "foods": [],
+            "dishes": [
+                {
+                    "name": "apple",
+                    "quantity": 22,
+                    "weight": 2200,
+                    "nutritionalValues": {
+                        "energy": 52,
+                        "fat": 0.2,
+                        "saturatedFattyAcids": 0.03,
+                        "carbohydrates": 13.8,
+                        "sugar": 10.4,
+                        "protein": 0.3,
+                        "salt": 0.01,
+                        "fiber": 2.4,
+                        "water": 85.56
+                    }
+                }
+            ],
+            "nutritionalValues": {
+                "energy": 52,
+                "fat": 0.2,
+                "saturatedFattyAcids": 0.03,
+                "carbohydrates": 13.8,
+                "sugar": 10.4,
+                "protein": 0.3,
+                "salt": 0.01,
+                "fiber": 2.4,
+                "water": 85.56
+            }
+        },
+        {
+            "name": "applemouse",
             "foods": [
                 {
-                    "name": "Apple",
-                    "quantity": null,
+                    "name": "apple",
+                    "quantity": 5,
                     "weight": 500,
                     "nutritionalValues": {
                         "energy": 260,
@@ -56,36 +108,36 @@
             }
         },
         {
-            "name": "Applemouse",
+            "name": "Applepie",
             "foods": [],
             "dishes": [
                 {
                     "name": "applejuice",
                     "quantity": 1,
-                    "weight": 500,
+                    "weight": 100,
                     "nutritionalValues": {
-                        "energy": 260,
-                        "fat": 1,
-                        "saturatedFattyAcids": 0.15,
-                        "carbohydrates": 69,
-                        "sugar": 52,
-                        "protein": 1.5,
-                        "salt": 0.05,
-                        "fiber": 12,
-                        "water": 427.8
+                        "energy": 52,
+                        "fat": 0.2,
+                        "saturatedFattyAcids": 0.03,
+                        "carbohydrates": 13.8,
+                        "sugar": 10.4,
+                        "protein": 0.3,
+                        "salt": 0.01,
+                        "fiber": 2.4,
+                        "water": 85.56
                     }
                 }
             ],
             "nutritionalValues": {
-                "energy": 260,
-                "fat": 1,
-                "saturatedFattyAcids": 0.15,
-                "carbohydrates": 69,
-                "sugar": 52,
-                "protein": 1.5,
-                "salt": 0.05,
-                "fiber": 12,
-                "water": 427.8
+                "energy": 52,
+                "fat": 0.2,
+                "saturatedFattyAcids": 0.03,
+                "carbohydrates": 13.8,
+                "sugar": 10.4,
+                "protein": 0.3,
+                "salt": 0.01,
+                "fiber": 2.4,
+                "water": 85.56
             }
         }
     ],
