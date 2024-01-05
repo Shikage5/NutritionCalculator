@@ -8,7 +8,7 @@ import (
 var ErrFoodAlreadyExists = errors.New("food already exists")
 var ErrFoodNotFound = errors.New("food not found")
 
-// GetFoodData gets the user's food data
+/*==========================CRUD=============================*/
 func (s *DefaultUserDataService) GetFoodData() ([]models.FoodData, error) {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -17,7 +17,6 @@ func (s *DefaultUserDataService) GetFoodData() ([]models.FoodData, error) {
 	return savedData.FoodData, nil
 }
 
-// AddFood adds a food to the user's data
 func (s *DefaultUserDataService) AddFoodData(foodData models.FoodData) error {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -32,7 +31,6 @@ func (s *DefaultUserDataService) AddFoodData(foodData models.FoodData) error {
 	return s.SaveUserData(savedData)
 }
 
-// UpdateFood updates a food in the user's data
 func (s *DefaultUserDataService) UpdateFoodData(foodData models.FoodData) error {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -49,7 +47,6 @@ func (s *DefaultUserDataService) UpdateFoodData(foodData models.FoodData) error 
 	return s.SaveUserData(savedData)
 }
 
-// DeleteFood deletes a food from the user's data
 func (s *DefaultUserDataService) DeleteFoodData(foodData models.FoodData) error {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -65,6 +62,8 @@ func (s *DefaultUserDataService) DeleteFoodData(foodData models.FoodData) error 
 	}
 	return s.SaveUserData(savedData)
 }
+
+/*==========================Specific FoodData OP=============================*/
 func (s *DefaultUserDataService) GetFoodDataByName(foodName string) (models.FoodData, error) {
 	savedData, err := s.GetUserData()
 	if err != nil {

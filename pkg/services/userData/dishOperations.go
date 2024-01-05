@@ -6,9 +6,11 @@ import (
 	"log"
 )
 
+/*===========================Dish Operations=============================*/
+
 func (s *DefaultUserDataService) CalculateDishNutritionalValues(dish models.Dish, processedDishes map[string]bool) (models.NutritionalValues, error) {
 	var totalDishNutritionalValues models.NutritionalValues
-
+	//Circular reference check
 	if processedDishes[dish.Name] {
 		return models.NutritionalValues{}, fmt.Errorf("circular reference detected with dish: %s", dish.Name)
 	}
@@ -20,8 +22,7 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(dish models.Dish
 		return models.NutritionalValues{}, err
 	}
 
-	/*==========================Add Nutritional Values of all Foods=============================*/
-
+	// Add Nutritional Values of all Foods
 	for _, food := range dishData.Foods {
 		if err != nil {
 			return models.NutritionalValues{}, err
@@ -35,8 +36,7 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(dish models.Dish
 		totalDishNutritionalValues = s.AddNutritions(totalDishNutritionalValues, foodNutritionalValues)
 	}
 
-	/*==========================Add Nutritional Values of all Dishes=============================*/
-
+	// Add Nutritional Values of all Dishes
 	totalDishWeight := s.CalculateTotalDishWeight(dishData.Dishes, processedDishes)
 
 	for _, dish := range dishData.Dishes {

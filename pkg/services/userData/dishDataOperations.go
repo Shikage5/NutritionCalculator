@@ -8,16 +8,8 @@ import (
 var ErrDishAlreadyExists = errors.New("dish already exists")
 var ErrDishNotFound = errors.New("dish not found")
 
-func (s *DefaultUserDataService) GetDishData() ([]models.DishData, error) {
-	savedData, err := s.GetUserData()
-	if err != nil {
-		return nil, err
-	}
-	return savedData.DishData, nil
+/*==========================CRUD=============================*/
 
-}
-
-// AddDish adds a dish to the user's data
 func (s *DefaultUserDataService) AddDishData(dishData models.DishData) error {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -30,6 +22,15 @@ func (s *DefaultUserDataService) AddDishData(dishData models.DishData) error {
 	}
 	savedData.DishData = append(savedData.DishData, dishData)
 	return s.SaveUserData(savedData)
+}
+
+func (s *DefaultUserDataService) GetDishData() ([]models.DishData, error) {
+	savedData, err := s.GetUserData()
+	if err != nil {
+		return nil, err
+	}
+	return savedData.DishData, nil
+
 }
 
 func (s *DefaultUserDataService) UpdateDishData(dishData models.DishData) error {
@@ -64,6 +65,7 @@ func (s *DefaultUserDataService) DeleteDishData(dishData models.DishData) error 
 	return s.SaveUserData(savedData)
 }
 
+/*==========================Specific DishData=============================*/
 func (s *DefaultUserDataService) GetDishDataByName(name string) (models.DishData, error) {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -77,10 +79,11 @@ func (s *DefaultUserDataService) GetDishDataByName(name string) (models.DishData
 	return models.DishData{}, ErrDishNotFound
 }
 
+/*==========================Nutritional Values=============================*/
 func (s *DefaultUserDataService) CalculateDishDataNutritionalValues(dishData models.DishData) (models.NutritionalValues, error) {
 	var totalDishNutritionalValues models.NutritionalValues
 
-	/*==========================Add Nutritional Values of all Foods=============================*/
+	// Add Nutritional Values of all Foods
 	for i, food := range dishData.Foods {
 		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
 		if err != nil {
@@ -97,8 +100,7 @@ func (s *DefaultUserDataService) CalculateDishDataNutritionalValues(dishData mod
 
 	}
 
-	/*==========================Add Nutritional Values of all Dishes=============================*/
-
+	// Add Nutritional Values of all Dishes
 	for i, dish := range dishData.Dishes {
 		dishNutritionalValues, err := s.CalculateDishNutritionalValues(dish, make(map[string]bool))
 		if err != nil {

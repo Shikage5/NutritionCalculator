@@ -5,6 +5,7 @@ import (
 	"fmt"
 )
 
+/*===========================Food Operations=============================*/
 func (s *DefaultUserDataService) CalculateFoodNutritionalValues(food models.Food) (models.NutritionalValues, error) {
 	foodData, err := s.GetFoodDataByName(food.Name)
 	if err != nil {

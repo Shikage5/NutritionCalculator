@@ -38,6 +38,44 @@
                 "name": "",
                 "weight": 100
             }
+        },
+        {
+            "name": "mango",
+            "nutritionalValues": {
+                "energy": 1,
+                "fat": 1,
+                "saturatedFattyAcids": 1,
+                "carbohydrates": 1,
+                "sugar": 1,
+                "protein": 1,
+                "salt": 1,
+                "fiber": 1,
+                "water": 1
+            },
+            "referenceWeight": 100,
+            "measurementUnit": {
+                "name": "",
+                "weight": 125
+            }
+        },
+        {
+            "name": "banana",
+            "nutritionalValues": {
+                "energy": 2,
+                "fat": 2,
+                "saturatedFattyAcids": 2,
+                "carbohydrates": 2,
+                "sugar": 2,
+                "protein": 2,
+                "salt": 2,
+                "fiber": 2,
+                "water": 2
+            },
+            "referenceWeight": 100,
+            "measurementUnit": {
+                "name": "",
+                "weight": 125
+            }
         }
     ],
     "dishData": [
@@ -138,6 +176,120 @@
                 "salt": 0.01,
                 "fiber": 2.4,
                 "water": 85.56
+            }
+        },
+        {
+            "name": "fruitsalad",
+            "foods": [
+                {
+                    "name": "mango",
+                    "quantity": null,
+                    "weight": 50,
+                    "nutritionalValues": {
+                        "energy": 0.5,
+                        "fat": 0.5,
+                        "saturatedFattyAcids": 0.5,
+                        "carbohydrates": 0.5,
+                        "sugar": 0.5,
+                        "protein": 0.5,
+                        "salt": 0.5,
+                        "fiber": 0.5,
+                        "water": 0.5
+                    }
+                },
+                {
+                    "name": "banana",
+                    "quantity": 1,
+                    "weight": 125,
+                    "nutritionalValues": {
+                        "energy": 2.5,
+                        "fat": 2.5,
+                        "saturatedFattyAcids": 2.5,
+                        "carbohydrates": 2.5,
+                        "sugar": 2.5,
+                        "protein": 2.5,
+                        "salt": 2.5,
+                        "fiber": 2.5,
+                        "water": 2.5
+                    }
+                },
+                {
+                    "name": "apple",
+                    "quantity": null,
+                    "weight": 100,
+                    "nutritionalValues": {
+                        "energy": 52,
+                        "fat": 0.2,
+                        "saturatedFattyAcids": 0.03,
+                        "carbohydrates": 13.8,
+                        "sugar": 10.4,
+                        "protein": 0.3,
+                        "salt": 0.01,
+                        "fiber": 2.4,
+                        "water": 85.56
+                    }
+                }
+            ],
+            "dishes": [],
+            "nutritionalValues": {
+                "energy": 55,
+                "fat": 3.2,
+                "saturatedFattyAcids": 3.03,
+                "carbohydrates": 16.8,
+                "sugar": 13.4,
+                "protein": 3.3,
+                "salt": 3.01,
+                "fiber": 5.4,
+                "water": 88.56
+            }
+        },
+        {
+            "name": "fruitsalad and applemouse",
+            "foods": [],
+            "dishes": [
+                {
+                    "name": "applemouse",
+                    "quantity": 1,
+                    "weight": 500,
+                    "nutritionalValues": {
+                        "energy": 260,
+                        "fat": 1,
+                        "saturatedFattyAcids": 0.15,
+                        "carbohydrates": 69,
+                        "sugar": 52,
+                        "protein": 1.5,
+                        "salt": 0.05,
+                        "fiber": 12,
+                        "water": 427.8
+                    }
+                },
+                {
+                    "name": "fruitsalad",
+                    "quantity": null,
+                    "weight": 200,
+                    "nutritionalValues": {
+                        "energy": 55,
+                        "fat": 3.2,
+                        "saturatedFattyAcids": 3.03,
+                        "carbohydrates": 16.8,
+                        "sugar": 13.4,
+                        "protein": 3.3,
+                        "salt": 3.01,
+                        "fiber": 5.4,
+                        "water": 88.56
+                    }
+                }
+            ],
+            "nutritionalValues": {
+                "energy": 315,
+                "fat": 4.2,
+                "saturatedFattyAcids": 3.1799999999999997,
+                "carbohydrates": 85.8,
+                "sugar": 65.4,
+                "protein": 4.8,
+                "salt": 3.0599999999999996,
+                "fiber": 17.4,
+                "water": 516.36
             }
         }
     ],

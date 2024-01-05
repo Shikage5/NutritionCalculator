@@ -3,20 +3,12 @@ package userData
 import (
 	"NutritionCalculator/data/models"
 	"errors"
-	"fmt"
 )
 
 var ErrMealAlreadyExists = errors.New("meal already exists")
 var ErrMealNotFound = errors.New("meal not found")
 
-func (s *DefaultUserDataService) GetMeals() ([]models.Meal, error) {
-	savedData, err := s.GetUserData()
-	if err != nil {
-		return nil, err
-	}
-	return savedData.Meals, nil
-}
-
+/*==========================CRUD=============================*/
 func (s *DefaultUserDataService) AddMeal(meal models.Meal) error {
 	savedData, err := s.GetUserData()
 	if err != nil {
@@ -29,6 +21,14 @@ func (s *DefaultUserDataService) AddMeal(meal models.Meal) error {
 	}
 	savedData.Meals = append(savedData.Meals, meal)
 	return s.SaveUserData(savedData)
+}
+
+func (s *DefaultUserDataService) GetMeals() ([]models.Meal, error) {
+	savedData, err := s.GetUserData()
+	if err != nil {
+		return nil, err
+	}
+	return savedData.Meals, nil
 }
 
 func (s *DefaultUserDataService) UpdateMeal(meal models.Meal) error {
@@ -63,10 +63,11 @@ func (s *DefaultUserDataService) DeleteMeal(meal models.Meal) error {
 	return s.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) CalculateMealNutritionalValues(meal models.Meal, processedDishes map[string]bool) (models.NutritionalValues, error) {
+/*==========================Nutritional Values=============================*/
+func (s *DefaultUserDataService) CalculateMealNutritionalValues(meal models.Meal) (models.NutritionalValues, error) {
 	var totalMealNutritionalValues models.NutritionalValues
 
-	/*==========================Add Nutritional Values of all Foods=============================*/
+	// Add Nutritional Values of all Foods
 
 	for _, food := range meal.Foods {
 		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
@@ -76,15 +77,10 @@ func (s *DefaultUserDataService) CalculateMealNutritionalValues(meal models.Meal
 		totalMealNutritionalValues = s.AddNutritions(totalMealNutritionalValues, foodNutritionalValues)
 	}
 
-	/*==========================Add Nutritional Values of all Dishes=============================*/
+	// Add Nutritional Values of all Dishes
 	for _, dish := range meal.Dishes {
-		//Circular reference check
-		if processedDishes[dish.Name] {
-			return models.NutritionalValues{}, fmt.Errorf("circular reference detected with dish: %s", dish.Name)
-		}
-		processedDishes[dish.Name] = true
 
-		dishNutritionalValues, err := s.CalculateDishNutritionalValues(dish, processedDishes)
+		dishNutritionalValues, err := s.CalculateDishNutritionalValues(dish, make(map[string]bool))
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}

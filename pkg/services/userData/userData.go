@@ -41,14 +41,17 @@ type UserDataService interface {
 	AddMeal(meal models.Meal) error
 	UpdateMeal(meal models.Meal) error
 	DeleteMeal(meal models.Meal) error
-	CalculateMealNutritionalValues(meal models.Meal, processedDishes map[string]bool) (models.NutritionalValues, error)
+	CalculateMealNutritionalValues(meal models.Meal) (models.NutritionalValues, error)
 
 	//Day operations
 	GetDays() ([]models.Day, error)
 	AddDay(day models.Day) error
 	UpdateDay(day models.Day) error
 	DeleteDay(day models.Day) error
-	CalculateDayNutritionalValues(day models.Day, processedDishes map[string]bool) (models.NutritionalValues, error)
+	GetDayByDate(date string) (models.Day, error)
+	GetLastSevenDays() ([]models.Day, error)
+	CalculateDayNutritionalValues(day models.Day) (models.NutritionalValues, error)
+	CalculateLastSevenDaysNutritionalValues() (models.NutritionalValues, error)
 }
 
 type DefaultUserDataService struct {
