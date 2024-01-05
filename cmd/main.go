@@ -27,9 +27,10 @@ func main() {
 	http.HandleFunc("/", middleware.SessionMiddleware(s.SessionService, greet))
 	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
 	http.HandleFunc("/login", middleware.ValidateUser(s.ValidationService, handlers.LoginHandler(s.AuthService, s.SessionService)))
-	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler()))
+	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler(userDataPath)))
+	http.HandleFunc("/dish", middleware.SessionMiddleware(s.SessionService, handlers.DishHandler(userDataPath)))
 	//ignore this
-	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData()))
+	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData(userDataPath)))
 
 	// Get the absolute path to the certificate file
 	certFile, err := filepath.Abs("server.crt")

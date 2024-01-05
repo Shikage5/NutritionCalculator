@@ -10,37 +10,16 @@ func (s *DefaultUserDataService) CalculateFoodNutritionalValues(food models.Food
 	if err != nil {
 		return models.NutritionalValues{}, err
 	}
-	if food.Weight != nil {
-		var foodNutritionalValues models.NutritionalValues
-		ratio := *food.Weight / foodData.ReferenceWeight
-		foodNutritionalValues.Carbohydrates = foodData.NutritionalValues.Carbohydrates * ratio
-		foodNutritionalValues.Energy = foodData.NutritionalValues.Energy * ratio
-		foodNutritionalValues.Fat = foodData.NutritionalValues.Fat * ratio
-		foodNutritionalValues.Fiber = foodData.NutritionalValues.Fiber * ratio
-		foodNutritionalValues.Protein = foodData.NutritionalValues.Protein * ratio
-		foodNutritionalValues.Salt = foodData.NutritionalValues.Salt * ratio
-		foodNutritionalValues.SaturatedFattyAcids = foodData.NutritionalValues.SaturatedFattyAcids * ratio
-		foodNutritionalValues.Sugar = foodData.NutritionalValues.Sugar * ratio
-		foodNutritionalValues.Water = foodData.NutritionalValues.Water * ratio
-
-		return foodNutritionalValues, nil
+	var foodNutritionalValues models.NutritionalValues
+	foodWeight, err := s.CalculateFoodWeight(food)
+	if err != nil {
+		return models.NutritionalValues{}, err
 	}
-	if food.Quantity != nil {
-		var foodNutritionalValues models.NutritionalValues
-		ratio := *food.Quantity / foodData.MeasurementUnit.Weight
-		foodNutritionalValues.Carbohydrates = foodData.NutritionalValues.Carbohydrates * ratio
-		foodNutritionalValues.Energy = foodData.NutritionalValues.Energy * ratio
-		foodNutritionalValues.Fat = foodData.NutritionalValues.Fat * ratio
-		foodNutritionalValues.Fiber = foodData.NutritionalValues.Fiber * ratio
-		foodNutritionalValues.Protein = foodData.NutritionalValues.Protein * ratio
-		foodNutritionalValues.Salt = foodData.NutritionalValues.Salt * ratio
-		foodNutritionalValues.SaturatedFattyAcids = foodData.NutritionalValues.SaturatedFattyAcids * ratio
-		foodNutritionalValues.Sugar = foodData.NutritionalValues.Sugar * ratio
-		foodNutritionalValues.Water = foodData.NutritionalValues.Water * ratio
+	ratio := foodWeight / foodData.ReferenceWeight
 
-		return foodNutritionalValues, nil
-	}
-	return models.NutritionalValues{}, fmt.Errorf("no weight or quantity specified for food %s", food.Name)
+	foodNutritionalValues = s.AddNutritionsByRatio(ratio, foodData.NutritionalValues)
+
+	return foodNutritionalValues, nil
 }
 
 func (s *DefaultUserDataService) CalculateTotalFoodWeight(foods []models.Food) float64 {

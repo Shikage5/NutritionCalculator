@@ -11,6 +11,8 @@ type UserDataService interface {
 	// User operations
 	GetUserData() (models.UserData, error)
 	SaveUserData(userData models.UserData) error
+	NewUserDataService(username string, userDataPath string) *DefaultUserDataService
+
 	// FoodData operations
 	GetFoodData() ([]models.FoodData, error)
 	AddFoodData(foodData models.FoodData) error
@@ -28,12 +30,25 @@ type UserDataService interface {
 	UpdateDishData(dishData models.DishData) error
 	DeleteDishData(dishData models.DishData) error
 	CalculateDishDataNutritionalValues(dishData models.DishData) (models.NutritionalValues, error)
+
 	//Dish Operations
 	CalculateDishNutritionalValues(dish models.Dish, processedDishes map[string]bool) (models.NutritionalValues, error)
 	CalculateTotalDishWeight(dishes []models.Dish) float64
 	CalculateDishWeight(dish models.Dish) (float64, error)
-	// Meal operations
 
+	// Meal operations
+	GetMeals() ([]models.Meal, error)
+	AddMeal(meal models.Meal) error
+	UpdateMeal(meal models.Meal) error
+	DeleteMeal(meal models.Meal) error
+	CalculateMealNutritionalValues(meal models.Meal, processedDishes map[string]bool) (models.NutritionalValues, error)
+
+	//Day operations
+	GetDays() ([]models.Day, error)
+	AddDay(day models.Day) error
+	UpdateDay(day models.Day) error
+	DeleteDay(day models.Day) error
+	CalculateDayNutritionalValues(day models.Day, processedDishes map[string]bool) (models.NutritionalValues, error)
 }
 
 type DefaultUserDataService struct {
@@ -41,8 +56,11 @@ type DefaultUserDataService struct {
 	Username     string
 }
 
-func NewUserDataService(username string) *DefaultUserDataService {
-	return &DefaultUserDataService{Username: username}
+func NewUserDataService(username string, userDataPath string) *DefaultUserDataService {
+	return &DefaultUserDataService{
+		Username:     username,
+		UserDataPath: userDataPath,
+	}
 }
 
 func (s *DefaultUserDataService) GetUserData() (models.UserData, error) {

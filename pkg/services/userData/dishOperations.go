@@ -22,35 +22,25 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(dish models.Dish
 
 	/*==========================Add Nutritional Values of all Foods=============================*/
 
-	totalFoodWeight := s.CalculateTotalFoodWeight(dishData.Foods)
 	for _, food := range dishData.Foods {
-		foodWeight, err := s.CalculateFoodWeight(food)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
-		ratio := foodWeight / totalFoodWeight
 
 		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
-		totalDishNutritionalValues.Carbohydrates += foodNutritionalValues.Carbohydrates * ratio
-		totalDishNutritionalValues.Energy += foodNutritionalValues.Energy * ratio
-		totalDishNutritionalValues.Fat += foodNutritionalValues.Fat * ratio
-		totalDishNutritionalValues.Fiber += foodNutritionalValues.Fiber * ratio
-		totalDishNutritionalValues.Protein += foodNutritionalValues.Protein * ratio
-		totalDishNutritionalValues.Salt += foodNutritionalValues.Salt * ratio
-		totalDishNutritionalValues.SaturatedFattyAcids += foodNutritionalValues.SaturatedFattyAcids * ratio
-		totalDishNutritionalValues.Sugar += foodNutritionalValues.Sugar * ratio
-		totalDishNutritionalValues.Water += foodNutritionalValues.Water * ratio
+
+		totalDishNutritionalValues = s.AddNutritions(totalDishNutritionalValues, foodNutritionalValues)
 	}
 
 	/*==========================Add Nutritional Values of all Dishes=============================*/
 
-	totalDishWeight := s.CalculateTotalDishWeight(dishData.Dishes)
+	totalDishWeight := s.CalculateTotalDishWeight(dishData.Dishes, processedDishes)
 
 	for _, dish := range dishData.Dishes {
-		dishWeight, err := s.CalculateDishWeight(dish)
+		dishWeight, err := s.CalculateDishWeight(dish, processedDishes)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
@@ -60,24 +50,17 @@ func (s *DefaultUserDataService) CalculateDishNutritionalValues(dish models.Dish
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
-		totalDishNutritionalValues.Carbohydrates += dishNutritionalValues.Carbohydrates * ratio
-		totalDishNutritionalValues.Energy += dishNutritionalValues.Energy * ratio
-		totalDishNutritionalValues.Fat += dishNutritionalValues.Fat * ratio
-		totalDishNutritionalValues.Fiber += dishNutritionalValues.Fiber * ratio
-		totalDishNutritionalValues.Protein += dishNutritionalValues.Protein * ratio
-		totalDishNutritionalValues.Salt += dishNutritionalValues.Salt * ratio
-		totalDishNutritionalValues.SaturatedFattyAcids += dishNutritionalValues.SaturatedFattyAcids * ratio
-		totalDishNutritionalValues.Sugar += dishNutritionalValues.Sugar * ratio
-		totalDishNutritionalValues.Water += dishNutritionalValues.Water * ratio
+		dishNutritionalValues = s.AddNutritionsByRatio(ratio, dishNutritionalValues)
+		totalDishNutritionalValues = s.AddNutritions(totalDishNutritionalValues, dishNutritionalValues)
 	}
 
 	return totalDishNutritionalValues, nil
 }
 
-func (s *DefaultUserDataService) CalculateTotalDishWeight(dishes []models.Dish) float64 {
+func (s *DefaultUserDataService) CalculateTotalDishWeight(dishes []models.Dish, processedDishes map[string]bool) float64 {
 	var totalDishWeight float64
 	for _, dish := range dishes {
-		dishWeight, err := s.CalculateDishWeight(dish)
+		dishWeight, err := s.CalculateDishWeight(dish, processedDishes)
 		if err != nil {
 			log.Println(err)
 			continue
@@ -87,18 +70,24 @@ func (s *DefaultUserDataService) CalculateTotalDishWeight(dishes []models.Dish) 
 	return totalDishWeight
 }
 
-func (s *DefaultUserDataService) CalculateDishWeight(dish models.Dish) (float64, error) {
+func (s *DefaultUserDataService) CalculateDishWeight(dish models.Dish, processedDishes map[string]bool) (float64, error) {
 
 	if dish.Weight != nil {
 		return *dish.Weight, nil
 	} else if dish.Quantity != nil {
+		//Circular reference check
+		if processedDishes[dish.Name] {
+			return 0, fmt.Errorf("circular reference detected with dish: %s", dish.Name)
+		}
+		processedDishes[dish.Name] = true
+
 		var totalDishWeight float64
 		dishData, err := s.GetDishDataByName(dish.Name)
 		if err != nil {
 			return 0, err
 		}
 		totalDishWeight += s.CalculateTotalFoodWeight(dishData.Foods)
-		totalDishWeight += s.CalculateTotalDishWeight(dishData.Dishes)
+		totalDishWeight += s.CalculateTotalDishWeight(dishData.Dishes, processedDishes)
 
 		return *dish.Quantity * totalDishWeight, nil
 	}

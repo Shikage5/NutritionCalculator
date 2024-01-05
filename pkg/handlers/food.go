@@ -11,13 +11,13 @@ import (
 	"net/http"
 )
 
-func FoodHandler() http.HandlerFunc {
+func FoodHandler(userDataPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		//Get user data based on username from context
 
 		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username)
+		userDataService := userData.NewUserDataService(username, userDataPath)
 		/*==========================GET=============================*/
 		if r.Method == http.MethodGet {
 

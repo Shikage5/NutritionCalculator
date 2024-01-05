@@ -11,12 +11,12 @@ import (
 	"net/http"
 )
 
-func DishHandler() http.HandlerFunc {
+func DishHandler(userDataPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		//Get user data based on username from context
 		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username)
+		userDataService := userData.NewUserDataService(username, userDataPath)
 
 		/*==========================GET=============================*/
 		if r.Method == http.MethodGet {
@@ -51,12 +51,12 @@ func DishHandler() http.HandlerFunc {
 			}
 
 			//Calculate the dish's nutrition
-			dishData.NutritionalValues, err = userDataService.CalculateDishDataNutritionalValues(dishData)
+			nutritionalValues, err := userDataService.CalculateDishDataNutritionalValues(dishData)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-
+			dishData.NutritionalValues = &nutritionalValues
 			//Add the dish to the user's data
 			err = userDataService.AddDishData(dishData)
 			if err != nil {

@@ -8,11 +8,11 @@ import (
 )
 
 // ignore this
-func TestUserData() http.HandlerFunc {
+func TestUserData(userDataPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodGet {
 			username := r.Context().Value(contextkeys.UserKey).(string)
-			userDataService := userData.NewUserDataService(username)
+			userDataService := userData.NewUserDataService(username, userDataPath)
 			userData, err := userDataService.GetUserData()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
