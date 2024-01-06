@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Nutrition Calculator</title>
+</head>
+<body>
+    <h1>Welcome, {{.UserData.Username}}</h1>
+
+    <h2>Nutritional Values for Today</h2>
+    <p>Energy: {{.DayNutritionalValues.Energy}}</p>
+    <p>Fat: {{.DayNutritionalValues.Fat}}</p>
+    <p>Saturated Fatty Acids: {{.DayNutritionalValues.SaturatedFattyAcids}}</p>
+    <p>Carbohydrates: {{.DayNutritionalValues.Carbohydrates}}</p>
+    <p>Sugar: {{.DayNutritionalValues.Sugar}}</p>
+    <p>Protein: {{.DayNutritionalValues.Protein}}</p>
+    <p>Salt: {{.DayNutritionalValues.Salt}}</p>
+    <p>Fiber: {{.DayNutritionalValues.Fiber}}</p>
+    <p>Water: {{.DayNutritionalValues.Water}}</p>
+
+    <h2>Average Nutritional Values for the Last Seven Days</h2>
+    <p>Energy: {{.AverageNutritionalValues.Energy}}</p>
+    <p>Fat: {{.AverageNutritionalValues.Fat}}</p>
+    <p>Saturated Fatty Acids: {{.AverageNutritionalValues.SaturatedFattyAcids}}</p>
+    <p>Carbohydrates: {{.AverageNutritionalValues.Carbohydrates}}</p>
+    <p>Sugar: {{.AverageNutritionalValues.Sugar}}</p>
+    <p>Protein: {{.AverageNutritionalValues.Protein}}</p>
+    <p>Salt: {{.AverageNutritionalValues.Salt}}</p>
+    <p>Fiber: {{.AverageNutritionalValues.Fiber}}</p>
+    <p>Water: {{.AverageNutritionalValues.Water}}</p>
+</body>
+</html>

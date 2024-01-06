@@ -45,13 +45,13 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 				return
 			}
 
-			http.Redirect(w, r, "/", http.StatusSeeOther)
+			http.Redirect(w, r, "/home", http.StatusSeeOther)
 			return
 		}
 
 		//Display the login page template
 		DisplayPage(w, data, "web/template/login.html")
-		w.WriteHeader(http.StatusOK)
+
 	}
 }
 
@@ -61,8 +61,5 @@ func DisplayPage(w http.ResponseWriter, data any, templatePath string) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	err = tmpl.Execute(w, data)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-	}
+	tmpl.Execute(w, data)
 }

@@ -47,6 +47,25 @@ func (s *DefaultUserDataService) UpdateDishData(dishData models.DishData) error 
 			return fmt.Errorf("%w: %s", ErrDishNotFound, dishData.Name)
 		}
 	}
+
+	//save the updated DishData
+	err = s.SaveUserData(savedData)
+	if err != nil {
+		return err
+	}
+	savedData.DishData, err = s.recalculateNutritionalValuesOfDishes(savedData.DishData)
+	if err != nil {
+		return err
+	}
+	savedData.Meals, err = s.recalculateNutritionalValuesOfMeals(savedData.Meals)
+	if err != nil {
+		return err
+	}
+	savedData.Days, err = s.recalculateNutritionalValuesOfDays(savedData.Days)
+	if err != nil {
+		return err
+	}
+
 	return s.SaveUserData(savedData)
 }
 

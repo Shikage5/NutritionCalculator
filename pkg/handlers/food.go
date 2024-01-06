@@ -6,7 +6,6 @@ import (
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
 	"encoding/json"
-	"html/template"
 	"log"
 	"net/http"
 )
@@ -29,7 +28,7 @@ func FoodHandler(userDataPath string) http.HandlerFunc {
 			}
 
 			DisplayPage(w, foodData, "web/template/foodData.html")
-			w.WriteHeader(http.StatusOK)
+
 			return
 
 			/*==========================POST=============================*/
@@ -57,8 +56,8 @@ func FoodHandler(userDataPath string) http.HandlerFunc {
 				return
 			}
 
-			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Food added!\n"))
+			DisplayPage(w, foodData, "web/template/food.html")
 
 			/*==========================PUT=============================*/
 		} else if r.Method == http.MethodPut {
@@ -70,6 +69,13 @@ func FoodHandler(userDataPath string) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateFoodData(foodData)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
+				return
+			}
 
 			//Update the food in the user's data
 			err = userDataService.UpdateFoodData(foodData)
@@ -78,19 +84,9 @@ func FoodHandler(userDataPath string) http.HandlerFunc {
 				return
 			}
 
-			//Display the food page
-			tmpl, err := template.ParseFiles("web/template/food.html")
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			err = tmpl.Execute(w, foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			//Display a message saying the food was updated
-			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Food updated!\n"))
+			DisplayPage(w, foodData, "web/template/food.html")
+
 			return
 
 			/*==========================DELETE=============================*/
@@ -112,20 +108,8 @@ func FoodHandler(userDataPath string) http.HandlerFunc {
 			}
 
 			//Display a message saying the food was deleted
-			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Food deleted!\n"))
-			//Display the food page
-			tmpl, err := template.ParseFiles("web/template/food.html")
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			err = tmpl.Execute(w, foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-
-			return
+			DisplayPage(w, foodData, "web/template/food.html")
 		}
 
 	}

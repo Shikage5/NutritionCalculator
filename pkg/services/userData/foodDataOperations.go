@@ -31,19 +31,44 @@ func (s *DefaultUserDataService) AddFoodData(foodData models.FoodData) error {
 	return s.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) UpdateFoodData(foodData models.FoodData) error {
+func (s *DefaultUserDataService) UpdateFoodData(newFoodData models.FoodData) error {
 	savedData, err := s.GetUserData()
 	if err != nil {
 		return err
 	}
+
 	for i, f := range savedData.FoodData {
-		if f.Name == foodData.Name {
-			savedData.FoodData[i] = foodData
+		if f.Name == newFoodData.Name {
+			savedData.FoodData[i] = newFoodData
 			break
 		} else if i == len(savedData.FoodData)-1 {
 			return ErrFoodNotFound
 		}
 	}
+	//save the updated FoodData
+	err = s.SaveUserData(savedData)
+	if err != nil {
+		return err
+	}
+
+	// Recalculate the nutritional values of all food items, dishes and meals
+	savedData, err = s.recalculateNutritionalValuesOfFoods(newFoodData.Name, savedData)
+	if err != nil {
+		return err
+	}
+	savedData.DishData, err = s.recalculateNutritionalValuesOfDishes(savedData.DishData)
+	if err != nil {
+		return err
+	}
+	savedData.Meals, err = s.recalculateNutritionalValuesOfMeals(savedData.Meals)
+	if err != nil {
+		return err
+	}
+	savedData.Days, err = s.recalculateNutritionalValuesOfDays(savedData.Days)
+	if err != nil {
+		return err
+	}
+
 	return s.SaveUserData(savedData)
 }
 
@@ -101,6 +126,35 @@ func (s *DefaultUserDataService) deleteFoodFromMeals(foodName string, meals []mo
 		}
 	}
 	return meals
+}
+
+/*==========================Recalculate Helper Functions=============================*/
+func (s *DefaultUserDataService) recalculateNutritionalValuesOfFoods(foodName string, savedData models.UserData) (models.UserData, error) {
+	for i, dish := range savedData.DishData {
+		for j, food := range dish.Foods {
+			if food.Name == foodName {
+				foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
+				if err != nil {
+					return models.UserData{}, err
+				}
+				savedData.DishData[i].Foods[j].NutritionalValues = &foodNutritionalValues
+				break
+			}
+		}
+	}
+	for i, meal := range savedData.Meals {
+		for j, food := range meal.Foods {
+			if food.Name == foodName {
+				foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
+				if err != nil {
+					return models.UserData{}, err
+				}
+				savedData.Meals[i].Foods[j].NutritionalValues = &foodNutritionalValues
+				break
+			}
+		}
+	}
+	return savedData, nil
 }
 
 /*==========================Specific FoodData OP=============================*/

@@ -1,7 +1,6 @@
 package main
 
 import (
-	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/handlers"
 	"NutritionCalculator/pkg/middleware"
 	"NutritionCalculator/pkg/services/auth"
@@ -15,12 +14,6 @@ import (
 	"path/filepath"
 )
 
-func greet(w http.ResponseWriter, r *http.Request) {
-
-	user := r.Context().Value(contextkeys.UserKey)
-	handlers.DisplayPage(w, user, "web/template/greet.html")
-}
-
 func main() {
 	port := flag.String("port", "8080", "port to run the server on")
 	userDataPath := "data/user_data/"
@@ -28,11 +21,12 @@ func main() {
 	flag.Parse()
 
 	s := startServices(userDataPath, credentialsDataPath)
-	http.HandleFunc("/", middleware.SessionMiddleware(s.SessionService, greet))
+	http.HandleFunc("/home", middleware.SessionMiddleware(s.SessionService, handlers.HomeHandler(userDataPath)))
 	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
 	http.HandleFunc("/login", middleware.ValidateUser(s.ValidationService, handlers.LoginHandler(s.AuthService, s.SessionService)))
 	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler(userDataPath)))
 	http.HandleFunc("/dish", middleware.SessionMiddleware(s.SessionService, handlers.DishHandler(userDataPath)))
+	http.HandleFunc("/meal", middleware.SessionMiddleware(s.SessionService, handlers.MealHandler(userDataPath)))
 	//ignore this
 	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData(userDataPath)))
 

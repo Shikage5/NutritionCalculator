@@ -44,7 +44,12 @@ func (s *DefaultUserDataService) UpdateMeal(meal models.Meal) error {
 			return ErrMealNotFound
 		}
 	}
+	savedData.Days, err = s.recalculateNutritionalValuesOfDays(savedData.Days)
+	if err != nil {
+		return err
+	}
 	return s.SaveUserData(savedData)
+
 }
 
 func (s *DefaultUserDataService) DeleteMeal(meal models.Meal) error {
@@ -103,21 +108,37 @@ func (s *DefaultUserDataService) CalculateMealNutritionalValues(meal models.Meal
 
 	// Add Nutritional Values of all Foods
 
-	for _, food := range meal.Foods {
+	for i, food := range meal.Foods {
 		foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
+
+		foodWeight, err := s.CalculateFoodWeight(food)
+		if err != nil {
+			return models.NutritionalValues{}, err
+		}
+		meal.Foods[i].NutritionalValues = &foodNutritionalValues
+		meal.Foods[i].Weight = &foodWeight
+
 		totalMealNutritionalValues = s.AddNutritions(totalMealNutritionalValues, foodNutritionalValues)
 	}
 
 	// Add Nutritional Values of all Dishes
-	for _, dish := range meal.Dishes {
+	for i, dish := range meal.Dishes {
 
 		dishNutritionalValues, err := s.CalculateDishNutritionalValues(dish, make(map[string]bool))
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
+
+		foodWeight, err := s.CalculateDishWeight(dish, make(map[string]bool))
+		if err != nil {
+			return models.NutritionalValues{}, err
+		}
+		meal.Dishes[i].NutritionalValues = &dishNutritionalValues
+		meal.Dishes[i].Weight = &foodWeight
+
 		totalMealNutritionalValues = s.AddNutritions(totalMealNutritionalValues, dishNutritionalValues)
 	}
 

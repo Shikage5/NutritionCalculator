@@ -6,7 +6,6 @@ import (
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
 	"encoding/json"
-	"html/template"
 	"log"
 	"net/http"
 	"strings"
@@ -30,7 +29,6 @@ func MealHandler(userDataPath string) http.HandlerFunc {
 			}
 
 			DisplayPage(w, meals, "web/template/meals.html")
-			w.WriteHeader(http.StatusOK)
 			return
 
 			/*==========================POST=============================*/
@@ -65,8 +63,10 @@ func MealHandler(userDataPath string) http.HandlerFunc {
 				return
 			}
 
-			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Meal added!\n"))
+
+			DisplayPage(w, meal, "web/template/meals.html")
+			return
 
 			/*==========================PUT=============================*/
 		} else if r.Method == http.MethodPut {
@@ -105,8 +105,10 @@ func MealHandler(userDataPath string) http.HandlerFunc {
 				return
 			}
 			//Display a message saying the meal was updated
-			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Meal updated!\n"))
+
+			DisplayPage(w, meal, "web/template/meals.html")
+
 			return
 
 			/*==========================DELETE=============================*/
@@ -134,19 +136,9 @@ func MealHandler(userDataPath string) http.HandlerFunc {
 				return
 			}
 
-			//Display a message saying the meal was deleted
-			w.WriteHeader(http.StatusOK)
 			w.Write([]byte("Meal deleted!\n"))
-			//Display the meal page
-			tmpl, err := template.ParseFiles("web/template/meal.html")
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			err = tmpl.Execute(w, meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
+
+			DisplayPage(w, meal, "web/template/meals.html")
 
 			return
 		}
