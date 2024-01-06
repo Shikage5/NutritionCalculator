@@ -4,7 +4,9 @@ import (
 	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
+	"NutritionCalculator/pkg/services/validation"
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -18,6 +20,7 @@ func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request
 		username := r.Context().Value(contextkeys.UserKey).(string)
 		userDataService := userData.NewUserDataService(username, userDataPath)
 
+		/*==========================GET=============================*/
 		if r.Method == http.MethodGet {
 			// Get the meals from the user data
 			meals, err := userDataService.GetMeals()
@@ -29,6 +32,8 @@ func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request
 			pageData := PageData{Meals: meals}
 			DisplayPage(w, pageData, "web/template/day.html")
 		}
+
+		/*==========================POST=============================*/
 		if r.Method == http.MethodPost {
 			// Get the day from the form
 
@@ -36,6 +41,14 @@ func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request
 			err := json.NewDecoder(r.Body).Decode(&day)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			//validate the day
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateDay(day)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 
@@ -57,12 +70,21 @@ func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request
 
 			DisplayPage(w, days, "web/template/day.html")
 		}
+
+		/*==========================PUT=============================*/
 		if r.Method == http.MethodPut {
 			// Get the day from the form
 			var day models.Day
 			err := json.NewDecoder(r.Body).Decode(&day)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateDay(day)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 
@@ -93,13 +115,20 @@ func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request
 			DisplayPage(w, days, "web/template/day.html")
 
 		}
-
+		/*==========================DELETE=============================*/
 		if r.Method == http.MethodDelete {
 			// Get the day from the form
 			var day models.Day
 			err := json.NewDecoder(r.Body).Decode(&day)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
+				return
+			}
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateDayForDeletion(day)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 

@@ -1,6 +1,7 @@
 package validation
 
 import (
+	"NutritionCalculator/data/models"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -44,14 +45,19 @@ func TestValidateCredentials(t *testing.T) {
 			// Setup
 			validationService := &DefaultValidationService{}
 
+			userRequest := models.UserRequest{
+				Username: tC.username,
+				Password: tC.password,
+			}
+
 			// Execute
-			result := validationService.ValidateCredentials(tC.username, tC.password)
+			err := validationService.ValidateUserRequest(userRequest)
 
 			// Assert
 			if tC.hasError {
-				assert.False(t, result, "Expected validation to fail but it passed")
+				assert.Error(t, err)
 			} else {
-				assert.True(t, result, "Expected validation to pass but it failed")
+				assert.NoError(t, err)
 			}
 		})
 	}

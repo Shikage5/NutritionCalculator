@@ -15,7 +15,7 @@ func RegisterHandler(registrationService registration.RegistrationService) http.
 				http.Error(w, "Registration failed", http.StatusBadRequest)
 				return
 			}
-			err := registrationService.RegisterUser(userRequest.Username, userRequest.Password)
+			err := registrationService.RegisterUser(userRequest)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return

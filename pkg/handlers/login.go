@@ -5,7 +5,9 @@ import (
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/auth"
 	"NutritionCalculator/pkg/services/session"
+	"NutritionCalculator/pkg/services/validation"
 	"html/template"
+	"log"
 	"net/http"
 )
 
@@ -21,6 +23,13 @@ func LoginHandler(authService auth.AuthService, sessionService session.SessionSe
 			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(models.UserRequest)
 			if !ok {
 				http.Error(w, "invalid form data", http.StatusBadRequest)
+				return
+			}
+			valiationService := &validation.DefaultValidationService{}
+			err := valiationService.ValidateUserRequest(userRequest)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 

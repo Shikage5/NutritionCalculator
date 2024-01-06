@@ -74,11 +74,11 @@ type MockValidatorService struct {
 	shouldFail bool
 }
 
-func (m *MockValidatorService) ValidateCredentials(username, password string) bool {
+func (m *MockValidatorService) ValidateUserRequest(models.UserRequest) error {
 	if m.shouldFail {
-		return false
+		return assert.AnError
 	} else {
-		return true
+		return nil
 	}
 }
 

@@ -99,6 +99,13 @@ func FoodHandler(userDataPath string) http.HandlerFunc {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
+			valiationService := &validation.DefaultValidationService{}
+			err = valiationService.ValidateFoodDataForDeletion(foodData)
+			if err != nil {
+				log.Println(err)
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
+				return
+			}
 
 			//Delete the food from the user's data
 			err = userDataService.DeleteFoodData(foodData)

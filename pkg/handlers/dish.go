@@ -119,7 +119,7 @@ func DishHandler(userDataPath string) http.HandlerFunc {
 				return
 			}
 			validationService := &validation.DefaultValidationService{}
-			err = validationService.ValidateDishData(dishData)
+			err = validationService.ValidateDishDataForDeletion(dishData)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)

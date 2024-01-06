@@ -10,7 +10,7 @@ import (
 
 // RegistrationService defines the interface for user registration.
 type RegistrationService interface {
-	RegisterUser(username, password string) error
+	RegisterUser(models.UserRequest) error
 }
 
 // DefaultRegistrationService is the default implementation of RegistrationService.
@@ -21,7 +21,7 @@ type DefaultRegistrationService struct {
 }
 
 // RegisterUser implements the registration logic.
-func (s *DefaultRegistrationService) RegisterUser(username, password string) error {
+func (s *DefaultRegistrationService) RegisterUser(userRequest models.UserRequest) error {
 
 	// Check if the userCredentials.json file exists and create it if it doesn't
 	if _, err := os.Stat(s.FilePath); os.IsNotExist(err) {
@@ -32,13 +32,13 @@ func (s *DefaultRegistrationService) RegisterUser(username, password string) err
 		file.Close()
 	}
 
-	hashedPassword, err := s.HashingService.HashPassword(password)
+	hashedPassword, err := s.HashingService.HashPassword(userRequest.Password)
 	if err != nil {
 		return err
 	}
 
 	user := models.UserCredentials{
-		Username:     username,
+		Username:     userRequest.Username,
 		PasswordHash: hashedPassword,
 	}
 
@@ -46,7 +46,7 @@ func (s *DefaultRegistrationService) RegisterUser(username, password string) err
 		return err
 	}
 	// Create a new user data file
-	userDataFile, err := os.Create(s.UserDataPath + username + ".json")
+	userDataFile, err := os.Create(s.UserDataPath + userRequest.Username + ".json")
 	if err != nil {
 		return err
 	}

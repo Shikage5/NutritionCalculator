@@ -22,10 +22,13 @@ func ValidateUser(validator validation.ValidationService, next http.HandlerFunc)
 				Username: r.FormValue("username"),
 				Password: r.FormValue("password"),
 			}
-			if !validator.ValidateCredentials(userRequest.Username, userRequest.Password) {
-				http.Error(w, "Username and password are required", http.StatusBadRequest)
+			// Validate the user request
+			err = validator.ValidateUserRequest(userRequest)
+			if err != nil {
+				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
+
 			ctx := context.WithValue(r.Context(), contextKeys.UserRequestKey, userRequest)
 
 			// Create a new request with the context

@@ -8,14 +8,18 @@ import (
 )
 
 type ValidationService interface {
-	ValidateCredentials(username, password string) bool
+	ValidateUserRequest(models.UserRequest) error
 	ValidateFoodData(foodData models.FoodData) error
 }
 
 type DefaultValidationService struct{}
 
-func (v *DefaultValidationService) ValidateCredentials(username, password string) bool {
-	return username != "" && password != ""
+func (v *DefaultValidationService) ValidateUserRequest(userRequest models.UserRequest) error {
+	if userRequest.Username != "" && userRequest.Password != "" {
+		return nil
+	}
+
+	return errors.New("username and password should not be empty")
 }
 
 //TODO: Add validation
@@ -166,5 +170,37 @@ func (v *DefaultValidationService) ValidateDay(day models.Day) error {
 			return fmt.Errorf("invalid meal: %w", err)
 		}
 	}
+	return nil
+}
+
+func (v *DefaultValidationService) ValidateFoodDataForDeletion(foodData models.FoodData) error {
+	if foodData.Name == "" {
+		return errors.New("food name should not be empty")
+	}
+
+	return nil
+}
+
+func (v *DefaultValidationService) ValidateDishDataForDeletion(dishData models.DishData) error {
+	if dishData.Name == "" {
+		return errors.New("dish name should not be empty")
+	}
+
+	return nil
+}
+
+func (v *DefaultValidationService) ValidateMealForDeletion(meal models.Meal) error {
+	if meal.Name == "" {
+		return errors.New("meal name should not be empty")
+	}
+
+	return nil
+}
+
+func (v *DefaultValidationService) ValidateDayForDeletion(day models.Day) error {
+	if day.Date == "" {
+		return errors.New("date should not be empty")
+	}
+
 	return nil
 }

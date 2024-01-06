@@ -1,6 +1,7 @@
 package registration
 
 import (
+	"NutritionCalculator/data/models"
 	"errors"
 	"os"
 	"testing"
@@ -56,9 +57,13 @@ func TestRegisterUser(t *testing.T) {
 				FilePath:       tempFile.Name(),
 				UserDataPath:   tempDir + "/",
 			}
+			userRequest := models.UserRequest{
+				Username: tC.username,
+				Password: tC.password,
+			}
 
 			// Execute
-			err = registrationService.RegisterUser(tC.username, tC.password)
+			err = registrationService.RegisterUser(userRequest)
 
 			// Assert
 			if tC.hasError {
