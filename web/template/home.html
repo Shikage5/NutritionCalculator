@@ -2,30 +2,72 @@
 <html>
 <head>
     <title>Nutrition Calculator</title>
+    <style>
+              body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #95b7ac;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #334858;
+        }
+        p {
+            color: #5c7b6e;
+        }
+        .nutrition-section {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .title {
+            color: #334858;
+            text-align: center;
+            padding: 20px 0;
+            font-size: 2em;
+            border-bottom: 1px solid #ddd;
+        }
+    </style>
 </head>
 <body>
-    <h1>Welcome, {{.UserData.Username}}</h1>
+    <div class="container">
+        <h1 class="title">Welcome, {{.UserData.Username}}</h1>
 
-    <h2>Nutritional Values for Today</h2>
-    <p>Energy: {{.DayNutritionalValues.Energy}}</p>
-    <p>Fat: {{.DayNutritionalValues.Fat}}</p>
-    <p>Saturated Fatty Acids: {{.DayNutritionalValues.SaturatedFattyAcids}}</p>
-    <p>Carbohydrates: {{.DayNutritionalValues.Carbohydrates}}</p>
-    <p>Sugar: {{.DayNutritionalValues.Sugar}}</p>
-    <p>Protein: {{.DayNutritionalValues.Protein}}</p>
-    <p>Salt: {{.DayNutritionalValues.Salt}}</p>
-    <p>Fiber: {{.DayNutritionalValues.Fiber}}</p>
-    <p>Water: {{.DayNutritionalValues.Water}}</p>
+        <div class="nutrition-section">
+            <h2>Nutritional Values for Today</h2>
+            <p>Energy: {{.DayNutritionalValues.Energy}}</p>
+            <h2>Nutritional Values for Today</h2>
+            <p>Energy: {{.DayNutritionalValues.Energy}}</p>
+            <p>Fat: {{.DayNutritionalValues.Fat}}</p>
+            <p>Saturated Fatty Acids: {{.DayNutritionalValues.SaturatedFattyAcids}}</p>
+            <p>Carbohydrates: {{.DayNutritionalValues.Carbohydrates}}</p>
+            <p>Sugar: {{.DayNutritionalValues.Sugar}}</p>
+            <p>Protein: {{.DayNutritionalValues.Protein}}</p>
+            <p>Salt: {{.DayNutritionalValues.Salt}}</p>
+            <p>Fiber: {{.DayNutritionalValues.Fiber}}</p>
+            <p>Water: {{.DayNutritionalValues.Water}}</p>
+        </div>
 
-    <h2>Average Nutritional Values for the Last Seven Days</h2>
-    <p>Energy: {{.AverageNutritionalValues.Energy}}</p>
-    <p>Fat: {{.AverageNutritionalValues.Fat}}</p>
-    <p>Saturated Fatty Acids: {{.AverageNutritionalValues.SaturatedFattyAcids}}</p>
-    <p>Carbohydrates: {{.AverageNutritionalValues.Carbohydrates}}</p>
-    <p>Sugar: {{.AverageNutritionalValues.Sugar}}</p>
-    <p>Protein: {{.AverageNutritionalValues.Protein}}</p>
-    <p>Salt: {{.AverageNutritionalValues.Salt}}</p>
-    <p>Fiber: {{.AverageNutritionalValues.Fiber}}</p>
-    <p>Water: {{.AverageNutritionalValues.Water}}</p>
+        <div class="nutrition-section">
+            <h2>Average Nutritional Values for the Last Seven Days</h2>
+            <p>Energy: {{.AverageNutritionalValues.Energy}}</p>
+            <p>Energy: {{.AverageNutritionalValues.Energy}}</p>
+            <p>Fat: {{.AverageNutritionalValues.Fat}}</p>
+            <p>Saturated Fatty Acids: {{.AverageNutritionalValues.SaturatedFattyAcids}}</p>
+            <p>Carbohydrates: {{.AverageNutritionalValues.Carbohydrates}}</p>
+            <p>Sugar: {{.AverageNutritionalValues.Sugar}}</p>
+            <p>Protein: {{.AverageNutritionalValues.Protein}}</p>
+            <p>Salt: {{.AverageNutritionalValues.Salt}}</p>
+            <p>Fiber: {{.AverageNutritionalValues.Fiber}}</p>
+            <p>Water: {{.AverageNutritionalValues.Water}}</p>
+        </div>
+    </div>
 </body>
 </html>

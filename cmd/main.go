@@ -11,39 +11,38 @@ import (
 	"flag"
 	"log"
 	"net/http"
-	"path/filepath"
 )
 
 func main() {
-	port := flag.String("port", "433", "port to run the server on")
+	port := flag.String("port", "443", "port to run the server on")
 	userDataPath := "data/user_data/"
 	credentialsDataPath := "data/userCredentials.json"
 	flag.Parse()
 
 	s := startServices(userDataPath, credentialsDataPath)
-	http.HandleFunc("/home", middleware.SessionMiddleware(s.SessionService, handlers.HomeHandler(userDataPath)))
-	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
+
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/login", http.StatusSeeOther)
+	})
+
 	http.HandleFunc("/login", middleware.ValidateUser(s.ValidationService, handlers.LoginHandler(s.AuthService, s.SessionService)))
+	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
+
+	http.HandleFunc("/home", middleware.SessionMiddleware(s.SessionService, handlers.HomeHandler(userDataPath)))
+
 	http.HandleFunc("/food", middleware.SessionMiddleware(s.SessionService, handlers.FoodHandler(userDataPath)))
 	http.HandleFunc("/dish", middleware.SessionMiddleware(s.SessionService, handlers.DishHandler(userDataPath)))
 	http.HandleFunc("/meal", middleware.SessionMiddleware(s.SessionService, handlers.MealHandler(userDataPath)))
-	//ignore this
-	http.HandleFunc("/testUserData", middleware.SessionMiddleware(s.SessionService, handlers.TestUserData(userDataPath)))
+	http.HandleFunc("/day", middleware.SessionMiddleware(s.SessionService, handlers.DayHandler(userDataPath)))
+
+	http.HandleFunc("/export", middleware.SessionMiddleware(s.SessionService, handlers.ExportHandler(userDataPath)))
 
 	// Get the absolute path to the certificate file
-	certFile, err := filepath.Abs("server.crt")
-	if err != nil {
-		log.Fatal("Failed to get absolute path for server.crt: ", err)
-	}
-
-	// Get the absolute path to the key file
-	keyFile, err := filepath.Abs("server.key")
-	if err != nil {
-		log.Fatal("Failed to get absolute path for server.key: ", err)
-	}
+	certFilePath := "server.crt"
+	keyFilePath := "server.key"
 
 	log.Println("Starting server on port:", *port)
-	err = http.ListenAndServeTLS(":"+*port, certFile, keyFile, nil)
+	err := http.ListenAndServeTLS(":"+*port, certFilePath, keyFilePath, nil)
 	if err != nil {
 		log.Fatal("ListenAndServeTLS: ", err)
 	}

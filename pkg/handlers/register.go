@@ -4,6 +4,8 @@ import (
 	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/registration"
+	"NutritionCalculator/pkg/services/validation"
+	"log"
 	"net/http"
 )
 
@@ -15,9 +17,29 @@ func RegisterHandler(registrationService registration.RegistrationService) http.
 				http.Error(w, "Registration failed", http.StatusBadRequest)
 				return
 			}
-			err := registrationService.RegisterUser(userRequest)
+
+			//validate userRequest
+
+			validationService := &validation.DefaultValidationService{}
+			err := validationService.ValidateUserRequest(userRequest)
 			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
+				log.Println(err)
+				data := PageData{
+					error: err.Error(),
+				}
+				w.WriteHeader(http.StatusBadRequest)
+				DisplayPage(w, data, "web/template/register.html")
+				return
+			}
+
+			err = registrationService.RegisterUser(userRequest)
+			if err != nil {
+				log.Println(err)
+				data := PageData{
+					error: err.Error(),
+				}
+				w.WriteHeader(http.StatusBadRequest)
+				DisplayPage(w, data, "web/template/register.html")
 				return
 			}
 

@@ -11,7 +11,7 @@ import (
 )
 
 type PageData struct {
-	Meals []models.Meal
+	error string
 }
 
 func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request) {
@@ -29,8 +29,7 @@ func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request
 				return
 			}
 
-			pageData := PageData{Meals: meals}
-			DisplayPage(w, pageData, "web/template/day.html")
+			DisplayPage(w, meals, "web/template/day.html")
 		}
 
 		/*==========================POST=============================*/
