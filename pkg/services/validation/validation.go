@@ -2,8 +2,6 @@ package validation
 
 import (
 	"NutritionCalculator/data/models"
-	"errors"
-	"regexp"
 )
 
 type ValidationService interface {
@@ -17,17 +15,20 @@ func (v *DefaultValidationService) ValidateCredentials(username, password string
 	return username != "" && password != ""
 }
 
+//TODO: Add validation
+
 func (v *DefaultValidationService) ValidateFoodData(foodData models.FoodData) error {
-	//if food data is not fully complete, return an error
-
-	match, _ := regexp.MatchString("^[a-zA-Z\\s]*$", foodData.Name)
-	if !match {
-		return errors.New("name must only contain letters and spaces")
-	}
-
 	return nil
 }
 
 func (v *DefaultValidationService) ValidateDishData(dishData models.DishData) error {
+	return nil
+}
+
+func (v *DefaultValidationService) ValidateMeal(meal models.Meal) error {
+	return nil
+}
+
+func (v *DefaultValidationService) ValidateDay(day models.Day) error {
 	return nil
 }

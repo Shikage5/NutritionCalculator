@@ -62,6 +62,19 @@ func (s *DefaultUserDataService) DeleteDay(day models.Day) error {
 	return s.SaveUserData(savedData)
 }
 
+/*==========================Delete Helper Fucntions=============================*/
+
+func (s *DefaultUserDataService) recalculateNutritionalValuesOfDays(days []models.Day) ([]models.Day, error) {
+	for i, day := range days {
+		nutritionalValues, err := s.CalculateDayNutritionalValues(day)
+		if err != nil {
+			return nil, err
+		}
+		days[i].NutritionalValues = &nutritionalValues
+	}
+	return days, nil
+}
+
 /*==========================Specific Days=============================*/
 
 func (s *DefaultUserDataService) GetDayByDate(date string) (models.Day, error) {

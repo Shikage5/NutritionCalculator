@@ -55,12 +55,46 @@ func (s *DefaultUserDataService) DeleteMeal(meal models.Meal) error {
 	for i, m := range savedData.Meals {
 		if m.Name == meal.Name {
 			savedData.Meals = append(savedData.Meals[:i], savedData.Meals[i+1:]...)
+
+			// Delete the meal from all days
+			savedData.Days = s.deleteMealFromDays(meal.Name, savedData.Days)
+
+			//recalculate nutritional values of all meals
+			savedData.Days, err = s.recalculateNutritionalValuesOfDays(savedData.Days)
+			if err != nil {
+				return err
+			}
+
 			break
 		} else if i == len(savedData.Meals)-1 {
 			return ErrMealNotFound
 		}
 	}
 	return s.SaveUserData(savedData)
+}
+
+/* ========================== Delete Helper Function============================= */
+func (s *DefaultUserDataService) deleteMealFromDays(mealName string, days []models.Day) []models.Day {
+	for i, day := range days {
+		for j, meal := range day.Meals {
+			if meal.Name == mealName {
+				days[i].Meals = append(day.Meals[:j], day.Meals[j+1:]...)
+				break
+			}
+		}
+	}
+	return days
+}
+
+func (s *DefaultUserDataService) recalculateNutritionalValuesOfMeals(meals []models.Meal) ([]models.Meal, error) {
+	for i, meal := range meals {
+		nutritionalValues, err := s.CalculateMealNutritionalValues(meal)
+		if err != nil {
+			return nil, err
+		}
+		meals[i].NutritionalValues = &nutritionalValues
+	}
+	return meals, nil
 }
 
 /*==========================Nutritional Values=============================*/

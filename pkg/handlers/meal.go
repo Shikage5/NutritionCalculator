@@ -6,12 +6,13 @@ import (
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
 	"encoding/json"
+	"html/template"
 	"log"
 	"net/http"
 	"strings"
 )
 
-func DishHandler(userDataPath string) http.HandlerFunc {
+func MealHandler(userDataPath string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 
 		//Get user data based on username from context
@@ -22,71 +23,71 @@ func DishHandler(userDataPath string) http.HandlerFunc {
 		if r.Method == http.MethodGet {
 
 			//Get the user's data
-			dishData, err := userDataService.GetDishData()
+			meals, err := userDataService.GetMeals()
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			DisplayPage(w, dishData, "web/template/dish.html")
+			DisplayPage(w, meals, "web/template/meals.html")
 			w.WriteHeader(http.StatusOK)
 			return
 
 			/*==========================POST=============================*/
 		} else if r.Method == http.MethodPost {
 
-			//Get the dish data from the request body
-			var dishData models.DishData
-			err := json.NewDecoder(r.Body).Decode(&dishData)
+			//Get the meal data from the request body
+			var meal models.Meal
+			err := json.NewDecoder(r.Body).Decode(&meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDishData(dishData)
+			err = valiationService.ValidateMeal(meal)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			//Calculate the dish's nutrition
-			nutritionalValues, err := userDataService.CalculateDishDataNutritionalValues(dishData)
+			//Calculate the meal's nutrition
+			nutritionalValues, err := userDataService.CalculateMealNutritionalValues(meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			dishData.NutritionalValues = &nutritionalValues
-			//Add the dish to the user's data
-			err = userDataService.AddDishData(dishData)
+			meal.NutritionalValues = &nutritionalValues
+			//Add the meal to the user's data
+			err = userDataService.AddMeal(meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Dish added!\n"))
+			w.Write([]byte("Meal added!\n"))
 
 			/*==========================PUT=============================*/
 		} else if r.Method == http.MethodPut {
 
-			//Get the dish from the request body
-			var dishData models.DishData
-			err := json.NewDecoder(r.Body).Decode(&dishData)
+			//Get the meal from the request body
+			var meal models.Meal
+			err := json.NewDecoder(r.Body).Decode(&meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDishData(dishData)
+			err = valiationService.ValidateMeal(meal)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			//calculate the dish's nutrition
-			nutritionalValues, err := userDataService.CalculateDishDataNutritionalValues(dishData)
+			//calculate the meal's nutrition
+			nutritionalValues, err := userDataService.CalculateMealNutritionalValues(meal)
 			if err != nil {
 				if strings.Contains(err.Error(), "circular reference") {
 					http.Error(w, "Invalid input: "+err.Error(), http.StatusBadRequest)
@@ -95,49 +96,58 @@ func DishHandler(userDataPath string) http.HandlerFunc {
 				}
 				return
 			}
-			dishData.NutritionalValues = &nutritionalValues
+			meal.NutritionalValues = &nutritionalValues
 
-			//Update the dish in the user's data
-			err = userDataService.UpdateDishData(dishData)
+			//Update the meal in the user's data
+			err = userDataService.UpdateMeal(meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
-			//Display a message saying the dish was updated
+			//Display a message saying the meal was updated
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Dish updated!\n"))
+			w.Write([]byte("Meal updated!\n"))
 			return
 
 			/*==========================DELETE=============================*/
 		} else if r.Method == http.MethodDelete {
 
-			//Get the dish from the request body
-			var dishData models.DishData
-			err := json.NewDecoder(r.Body).Decode(&dishData)
+			//Get the meal from the request body
+			var meal models.Meal
+			err := json.NewDecoder(r.Body).Decode(&meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusBadRequest)
 				return
 			}
 			validationService := &validation.DefaultValidationService{}
-			err = validationService.ValidateDishData(dishData)
+			err = validationService.ValidateMeal(meal)
 			if err != nil {
 				log.Println(err)
 				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
 				return
 			}
 
-			//Delete the dish from the user's data
-			err = userDataService.DeleteDishData(dishData)
+			//Delete the meal from the user's data
+			err = userDataService.DeleteMeal(meal)
 			if err != nil {
 				http.Error(w, err.Error(), http.StatusInternalServerError)
 				return
 			}
 
-			//Display a message saying the dish was deleted
+			//Display a message saying the meal was deleted
 			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Dish deleted!\n"))
+			w.Write([]byte("Meal deleted!\n"))
+			//Display the meal page
+			tmpl, err := template.ParseFiles("web/template/meal.html")
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			err = tmpl.Execute(w, meal)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
 
-			DisplayPage(w, dishData, "web/template/dish.html")
 			return
 		}
 
