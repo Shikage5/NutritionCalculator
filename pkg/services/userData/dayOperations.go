@@ -43,6 +43,7 @@ func (s *DefaultUserDataService) UpdateDay(day models.Day) error {
 			return ErrDayNotFound
 		}
 	}
+
 	return s.SaveUserData(savedData)
 }
 

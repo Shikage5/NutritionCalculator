@@ -18,7 +18,7 @@ func (s *DefaultUserDataService) CalculateFoodNutritionalValues(food models.Food
 	}
 	ratio := foodWeight / foodData.ReferenceWeight
 
-	foodNutritionalValues = s.AddNutritionsByRatio(ratio, foodData.NutritionalValues)
+	foodNutritionalValues = s.AddNutritionsByRatio(ratio, *foodData.NutritionalValues)
 
 	return foodNutritionalValues, nil
 }
