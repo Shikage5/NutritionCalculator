@@ -9,6 +9,7 @@ import (
 	"NutritionCalculator/pkg/services/registration"
 	"NutritionCalculator/pkg/services/session"
 	"NutritionCalculator/pkg/services/validation"
+	"flag"
 	"log"
 	"net/http"
 	"path/filepath"
@@ -21,8 +22,11 @@ func greet(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	const userDataPath = "data/user_data/"
-	const credentialsDataPath = "data/userCredentials.json"
+	port := flag.String("port", "8080", "port to run the server on")
+	userDataPath := "data/user_data/"
+	credentialsDataPath := "data/userCredentials.json"
+	flag.Parse()
+
 	s := startServices(userDataPath, credentialsDataPath)
 	http.HandleFunc("/", middleware.SessionMiddleware(s.SessionService, greet))
 	http.HandleFunc("/register", middleware.ValidateUser(s.ValidationService, handlers.RegisterHandler(s.RegistrationService)))
@@ -44,7 +48,8 @@ func main() {
 		log.Fatal("Failed to get absolute path for server.key: ", err)
 	}
 
-	err = http.ListenAndServeTLS(":443", certFile, keyFile, nil)
+	log.Println("Starting server on port:", *port)
+	err = http.ListenAndServeTLS(":"+*port, certFile, keyFile, nil)
 	if err != nil {
 		log.Fatal("ListenAndServeTLS: ", err)
 	}

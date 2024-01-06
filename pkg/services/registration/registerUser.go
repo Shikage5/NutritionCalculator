@@ -23,6 +23,15 @@ type DefaultRegistrationService struct {
 // RegisterUser implements the registration logic.
 func (s *DefaultRegistrationService) RegisterUser(username, password string) error {
 
+	// Check if the userCredentials.json file exists and create it if it doesn't
+	if _, err := os.Stat(s.FilePath); os.IsNotExist(err) {
+		file, err := os.Create(s.FilePath)
+		if err != nil {
+			return err
+		}
+		file.Close()
+	}
+
 	hashedPassword, err := s.HashingService.HashPassword(password)
 	if err != nil {
 		return err
