@@ -15,7 +15,7 @@ import (
 )
 
 func main() {
-	port := flag.String("port", "8080", "port to run the server on")
+	port := flag.String("port", "433", "port to run the server on")
 	userDataPath := "data/user_data/"
 	credentialsDataPath := "data/userCredentials.json"
 	flag.Parse()
