@@ -4,65 +4,74 @@ import (
 	"NutritionCalculator/data/models"
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
+	"NutritionCalculator/utils"
+	"errors"
+	"log"
 	"net/http"
 	"time"
 )
 
-func HomeHandler(userDataPath string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Get user data based on username from context
-		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username, userDataPath)
-		if r.Method == http.MethodGet {
-			userData, err := userDataService.GetUserData()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+type HomeHandler struct {
+	UserDataService userData.DefaultUserDataService
+	DayService      userData.DefaultDayService
+}
 
-			// Check if a Day object for today already exists
-			todaysDate := time.Now().Format("2006-01-02")
-			today := models.Day{Date: todaysDate}
-			err = userDataService.AddDay(today)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+func NewHomeHandler(userDataService userData.DefaultUserDataService, dayService userData.DefaultDayService) *HomeHandler {
+	return &HomeHandler{UserDataService: userDataService, DayService: dayService}
+}
 
-			// Save the updated user data
-			err = userDataService.SaveUserData(userData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+func (h *HomeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(contextkeys.UserKey).(string)
 
-			// Calculate the nutritional values of the day
-			dayNutritionalValues, err := userDataService.CalculateDayNutritionalValues(today)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			// Calculate the average nutritional values of the last seven days
-			averageNutritionalValues, err := userDataService.CalculateLastSevenDaysNutritionalValues()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			// Create a struct to hold the data for the overview page
-			overviewData := struct {
-				UserData                 models.UserData
-				DayNutritionalValues     models.NutritionalValues
-				AverageNutritionalValues models.NutritionalValues
-			}{
-				UserData:                 userData,
-				DayNutritionalValues:     dayNutritionalValues,
-				AverageNutritionalValues: averageNutritionalValues,
-			}
-
-			// Display the overview page with the calculated data
-			DisplayPage(w, overviewData, "web/template/home.html")
-		}
+	switch r.Method {
+	case http.MethodGet:
+		h.handleGet(w, username)
+	default:
+		h.handleError(w, errors.New("invalid method"), http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *HomeHandler) handleGet(w http.ResponseWriter, username string) {
+	userData, err := h.UserDataService.GetUserData(username)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	todaysDate := time.Now().Format("2006-01-02")
+	today := models.Day{Date: todaysDate}
+	err = h.DayService.AddDay(username, today)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	dayNutritionalValues, err := h.DayService.CalculateDayNutritionalValues(today)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	averageNutritionalValues, err := h.DayService.CalculateLastSevenDaysNutritionalValues(username)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	overviewData := struct {
+		UserData                 models.UserData
+		DayNutritionalValues     models.NutritionalValues
+		AverageNutritionalValues models.NutritionalValues
+	}{
+		UserData:                 userData,
+		DayNutritionalValues:     dayNutritionalValues,
+		AverageNutritionalValues: averageNutritionalValues,
+	}
+
+	utils.DisplayPage(w, overviewData, "web/template/home.html")
+}
+
+func (h *HomeHandler) handleError(w http.ResponseWriter, err error, statusCode int) {
+	log.Println(err)
+	http.Error(w, err.Error(), statusCode)
 }

@@ -5,150 +5,135 @@ import (
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
+	"NutritionCalculator/utils"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
 
-type PageData struct {
-	error string
+type DayHandler struct {
+	DayService        userData.DefaultDayService
+	MealService       userData.DefaultMealService
+	ValidationService validation.DefaultValidationService
 }
 
-func DayHandler(userDataPath string) func(w http.ResponseWriter, r *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		// Get user data based on username from context
-		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username, userDataPath)
+func NewDayHandler(dayService userData.DefaultDayService, mealService userData.DefaultMealService, validationService validation.DefaultValidationService) *DayHandler {
+	return &DayHandler{DayService: dayService, MealService: mealService, ValidationService: validationService}
+}
 
-		/*==========================GET=============================*/
-		if r.Method == http.MethodGet {
-			// Get the meals from the user data
-			meals, err := userDataService.GetMeals()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+func (h *DayHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(contextkeys.UserKey).(string)
 
-			DisplayPage(w, meals, "web/template/day.html")
-		}
-
-		/*==========================POST=============================*/
-		if r.Method == http.MethodPost {
-			// Get the day from the form
-
-			var day models.Day
-			err := json.NewDecoder(r.Body).Decode(&day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			//validate the day
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDay(day)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			// Add the day to the user data
-			err = userDataService.AddDay(day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Day added!\n"))
-
-			// Display the day page
-			days, err := userDataService.GetDays()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			DisplayPage(w, days, "web/template/day.html")
-		}
-
-		/*==========================PUT=============================*/
-		if r.Method == http.MethodPut {
-			// Get the day from the form
-			var day models.Day
-			err := json.NewDecoder(r.Body).Decode(&day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDay(day)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//calculate the day's nutritional values
-			nutritionalValues, err := userDataService.CalculateDayNutritionalValues(day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			day.NutritionalValues = &nutritionalValues
-
-			// Update the day to the user data
-			err = userDataService.UpdateDay(day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Day updated!\n"))
-
-			// Display the day page
-			days, err := userDataService.GetDays()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			DisplayPage(w, days, "web/template/day.html")
-
-		}
-		/*==========================DELETE=============================*/
-		if r.Method == http.MethodDelete {
-			// Get the day from the form
-			var day models.Day
-			err := json.NewDecoder(r.Body).Decode(&day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDayForDeletion(day)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			// Delete the day from the user data
-			err = userDataService.DeleteDay(day)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Day deleted!\n"))
-
-			// Display the day page
-			days, err := userDataService.GetDays()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			DisplayPage(w, days, "web/template/day.html")
-		}
-
+	switch r.Method {
+	case http.MethodGet:
+		h.handleGet(w, username)
+	case http.MethodPost:
+		h.handlePost(w, r, username)
+	case http.MethodPut:
+		h.handlePut(w, r, username)
+	case http.MethodDelete:
+		h.handleDelete(w, r, username)
+	default:
+		h.handleError(w, errors.New("invalid method"), http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *DayHandler) handleGet(w http.ResponseWriter, username string) {
+	h.displayDayPage(w, username)
+}
+
+func (h *DayHandler) handlePost(w http.ResponseWriter, r *http.Request, username string) {
+	day, err := h.decodeAndValidateDay(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.DayService.AddDay(username, day)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Day added!\n"))
+	h.displayDayPage(w, username)
+}
+
+func (h *DayHandler) handlePut(w http.ResponseWriter, r *http.Request, username string) {
+	day, err := h.decodeAndValidateDay(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	nutritionalValues, err := h.DayService.CalculateDayNutritionalValues(day)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+	day.NutritionalValues = &nutritionalValues
+
+	err = h.DayService.UpdateDay(username, day)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Day updated!\n"))
+	h.displayDayPage(w, username)
+}
+
+func (h *DayHandler) handleDelete(w http.ResponseWriter, r *http.Request, username string) {
+	var day models.Day
+	err := json.NewDecoder(r.Body).Decode(&day)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.ValidationService.ValidateDayForDeletion(day)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.DayService.DeleteDay(username, day)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Day deleted!\n"))
+	h.displayDayPage(w, username)
+}
+
+func (h *DayHandler) decodeAndValidateDay(r *http.Request) (models.Day, error) {
+	var day models.Day
+	err := json.NewDecoder(r.Body).Decode(&day)
+	if err != nil {
+		return models.Day{}, err
+	}
+
+	err = h.ValidationService.ValidateDay(day)
+	if err != nil {
+		return models.Day{}, err
+	}
+
+	return day, nil
+}
+
+func (h *DayHandler) displayDayPage(w http.ResponseWriter, username string) {
+	days, err := h.DayService.GetDays(username)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	utils.DisplayPage(w, days, "web/template/day.html")
+}
+
+func (h *DayHandler) handleError(w http.ResponseWriter, err error, statusCode int) {
+	log.Println(err)
+	http.Error(w, err.Error(), statusCode)
 }

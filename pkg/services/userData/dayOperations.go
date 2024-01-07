@@ -5,12 +5,34 @@ import (
 	"errors"
 )
 
+type DayService interface {
+	AddDay(username string, day models.Day) error
+	GetDays(username string) ([]models.Day, error)
+	UpdateDay(username string, day models.Day) error
+	DeleteDay(username string, day models.Day) error
+	GetDayByDate(username string, date string) (models.Day, error)
+	GetLastSevenDays(username string) ([]models.Day, error)
+	RecalculateNutritionalValuesOfDays([]models.Day) ([]models.Day, error)
+	CalculateDayNutritionalValues(models.Day) (models.NutritionalValues, error)
+	CalculateLastSevenDaysNutritionalValues(string) (models.NutritionalValues, error)
+}
+
+type DefaultDayService struct {
+	UserDataService        UserDataService
+	MealService            MealService
+	NutritionValuesService NutritionValuesService
+}
+
 var ErrDayAlreadyExists = errors.New("day already exists")
 var ErrDayNotFound = errors.New("day not found")
 
+func NewDayService(userDataService UserDataService, mealService MealService, nutritionValuesService NutritionValuesService) *DefaultDayService {
+	return &DefaultDayService{UserDataService: userDataService, MealService: mealService, NutritionValuesService: nutritionValuesService}
+}
+
 /*==========================CRUD=============================*/
-func (s *DefaultUserDataService) AddDay(day models.Day) error {
-	savedData, err := s.GetUserData()
+func (s *DefaultDayService) AddDay(username string, day models.Day) error {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return err
 	}
@@ -20,18 +42,18 @@ func (s *DefaultUserDataService) AddDay(day models.Day) error {
 		}
 	}
 	savedData.Days = append(savedData.Days, day)
-	return s.SaveUserData(savedData)
+	return s.UserDataService.SaveUserData(savedData)
 }
-func (s *DefaultUserDataService) GetDays() ([]models.Day, error) {
-	savedData, err := s.GetUserData()
+func (s *DefaultDayService) GetDays(username string) ([]models.Day, error) {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return nil, err
 	}
 	return savedData.Days, nil
 }
 
-func (s *DefaultUserDataService) UpdateDay(day models.Day) error {
-	savedData, err := s.GetUserData()
+func (s *DefaultDayService) UpdateDay(username string, day models.Day) error {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return err
 	}
@@ -44,11 +66,11 @@ func (s *DefaultUserDataService) UpdateDay(day models.Day) error {
 		}
 	}
 
-	return s.SaveUserData(savedData)
+	return s.UserDataService.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) DeleteDay(day models.Day) error {
-	savedData, err := s.GetUserData()
+func (s *DefaultDayService) DeleteDay(username string, day models.Day) error {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return err
 	}
@@ -60,12 +82,12 @@ func (s *DefaultUserDataService) DeleteDay(day models.Day) error {
 			return ErrDayNotFound
 		}
 	}
-	return s.SaveUserData(savedData)
+	return s.UserDataService.SaveUserData(savedData)
 }
 
 /*==========================Delete Helper Fucntions=============================*/
 
-func (s *DefaultUserDataService) recalculateNutritionalValuesOfDays(days []models.Day) ([]models.Day, error) {
+func (s *DefaultDayService) RecalculateNutritionalValuesOfDays(days []models.Day) ([]models.Day, error) {
 	for i, day := range days {
 		nutritionalValues, err := s.CalculateDayNutritionalValues(day)
 		if err != nil {
@@ -78,8 +100,8 @@ func (s *DefaultUserDataService) recalculateNutritionalValuesOfDays(days []model
 
 /*==========================Specific Days=============================*/
 
-func (s *DefaultUserDataService) GetDayByDate(date string) (models.Day, error) {
-	savedData, err := s.GetUserData()
+func (s *DefaultDayService) GetDayByDate(username string, date string) (models.Day, error) {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return models.Day{}, err
 	}
@@ -91,8 +113,8 @@ func (s *DefaultUserDataService) GetDayByDate(date string) (models.Day, error) {
 	return models.Day{}, ErrDayNotFound
 }
 
-func (s *DefaultUserDataService) GetLastSevenDays() ([]models.Day, error) {
-	savedData, err := s.GetUserData()
+func (s *DefaultDayService) GetLastSevenDays(username string) ([]models.Day, error) {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return nil, err
 	}
@@ -103,21 +125,21 @@ func (s *DefaultUserDataService) GetLastSevenDays() ([]models.Day, error) {
 }
 
 /*==========================Day Nutritional Values=============================*/
-func (s *DefaultUserDataService) CalculateDayNutritionalValues(day models.Day) (models.NutritionalValues, error) {
+func (s *DefaultDayService) CalculateDayNutritionalValues(day models.Day) (models.NutritionalValues, error) {
 	var dayNutritionalValues models.NutritionalValues
 	for _, meal := range day.Meals {
-		mealNutritionalValues, err := s.CalculateMealNutritionalValues(meal)
+		mealNutritionalValues, err := s.MealService.CalculateMealNutritionalValues(meal)
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
-		dayNutritionalValues = s.AddNutritions(dayNutritionalValues, mealNutritionalValues)
+		dayNutritionalValues = s.NutritionValuesService.AddNutritions(dayNutritionalValues, mealNutritionalValues)
 	}
 	return dayNutritionalValues, nil
 }
 
-func (s *DefaultUserDataService) CalculateLastSevenDaysNutritionalValues() (models.NutritionalValues, error) {
+func (s *DefaultDayService) CalculateLastSevenDaysNutritionalValues(username string) (models.NutritionalValues, error) {
 	var totalNutritionalValues models.NutritionalValues
-	days, err := s.GetLastSevenDays()
+	days, err := s.GetLastSevenDays(username)
 	if err != nil {
 		return models.NutritionalValues{}, err
 	}
@@ -126,7 +148,7 @@ func (s *DefaultUserDataService) CalculateLastSevenDaysNutritionalValues() (mode
 		if err != nil {
 			return models.NutritionalValues{}, err
 		}
-		totalNutritionalValues = s.AddNutritions(totalNutritionalValues, dayNutritionalValues)
+		totalNutritionalValues = s.NutritionValuesService.AddNutritions(totalNutritionalValues, dayNutritionalValues)
 	}
 	return totalNutritionalValues, nil
 }

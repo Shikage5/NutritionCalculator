@@ -14,6 +14,10 @@ type ValidationService interface {
 
 type DefaultValidationService struct{}
 
+func NewValidationService() *DefaultValidationService {
+	return &DefaultValidationService{}
+}
+
 func (v *DefaultValidationService) ValidateUserRequest(userRequest models.UserRequest) error {
 	if userRequest.Username != "" && userRequest.Password != "" {
 		return nil

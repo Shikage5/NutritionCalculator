@@ -5,142 +5,142 @@ import (
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
+	"NutritionCalculator/utils"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
-	"strings"
 )
 
-func DishHandler(userDataPath string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type DishHandler struct {
+	DishDataService   userData.DefaultDishDataService
+	ValidationService validation.DefaultValidationService
+}
 
-		//Get user data based on username from context
-		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username, userDataPath)
+func NewDishHandler(dishDataService userData.DefaultDishDataService, validationService validation.DefaultValidationService) *DishHandler {
+	return &DishHandler{DishDataService: dishDataService, ValidationService: validationService}
+}
 
-		/*==========================GET=============================*/
-		if r.Method == http.MethodGet {
+func (h *DishHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(contextkeys.UserKey).(string)
 
-			//Get the user's data
-			dishData, err := userDataService.GetDishData()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+	switch r.Method {
+	case http.MethodGet:
+		h.handleGet(w, username)
+	case http.MethodPost:
+		h.handlePost(w, r, username)
+	case http.MethodPut:
+		h.handlePut(w, r, username)
+	case http.MethodDelete:
+		h.handleDelete(w, r, username)
+	default:
+		h.handleError(w, errors.New("invalid method"), http.StatusMethodNotAllowed)
+	}
+}
 
-			DisplayPage(w, dishData, "web/template/dish.html")
-			w.WriteHeader(http.StatusOK)
-			return
+func (h *DishHandler) handleGet(w http.ResponseWriter, username string) {
+	h.displayDishPage(w, username)
+}
 
-			/*==========================POST=============================*/
-		} else if r.Method == http.MethodPost {
-
-			//Get the dish data from the request body
-			var dishData models.DishData
-			err := json.NewDecoder(r.Body).Decode(&dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDishData(dishData)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Calculate the dish's nutrition
-			nutritionalValues, err := userDataService.CalculateDishDataNutritionalValues(dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			dishData.NutritionalValues = &nutritionalValues
-			//Add the dish to the user's data
-			err = userDataService.AddDishData(dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Dish added!\n"))
-
-			/*==========================PUT=============================*/
-		} else if r.Method == http.MethodPut {
-
-			//Get the dish from the request body
-			var dishData models.DishData
-			err := json.NewDecoder(r.Body).Decode(&dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateDishData(dishData)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//calculate the dish's nutrition
-			nutritionalValues, err := userDataService.CalculateDishDataNutritionalValues(dishData)
-			if err != nil {
-				if strings.Contains(err.Error(), "circular reference") {
-					http.Error(w, "Invalid input: "+err.Error(), http.StatusBadRequest)
-				} else {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-				}
-				return
-			}
-			dishData.NutritionalValues = &nutritionalValues
-
-			//Update the dish in the user's data
-			err = userDataService.UpdateDishData(dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			//Display a message saying the dish was updated
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Dish updated!\n"))
-			return
-
-			/*==========================DELETE=============================*/
-		} else if r.Method == http.MethodDelete {
-
-			//Get the dish from the request body
-			var dishData models.DishData
-			err := json.NewDecoder(r.Body).Decode(&dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			validationService := &validation.DefaultValidationService{}
-			err = validationService.ValidateDishDataForDeletion(dishData)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Delete the dish from the user's data
-			err = userDataService.DeleteDishData(dishData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			//Display a message saying the dish was deleted
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte("Dish deleted!\n"))
-
-			DisplayPage(w, dishData, "web/template/dish.html")
-			return
-		}
-
+func (h *DishHandler) handlePost(w http.ResponseWriter, r *http.Request, username string) {
+	dishData, err := h.decodeAndValidateDish(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
 	}
 
+	nutritionalValues, err := h.DishDataService.CalculateDishDataNutritionalValues(dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+	dishData.NutritionalValues = &nutritionalValues
+
+	err = h.DishDataService.AddDishData(username, dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Dish added!\n"))
+	h.displayDishPage(w, username)
+}
+
+func (h *DishHandler) handlePut(w http.ResponseWriter, r *http.Request, username string) {
+	dishData, err := h.decodeAndValidateDish(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	nutritionalValues, err := h.DishDataService.CalculateDishDataNutritionalValues(dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+	dishData.NutritionalValues = &nutritionalValues
+
+	err = h.DishDataService.UpdateDishData(username, dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Dish updated!\n"))
+	h.displayDishPage(w, username)
+}
+
+func (h *DishHandler) handleDelete(w http.ResponseWriter, r *http.Request, username string) {
+	var dishData models.DishData
+	err := json.NewDecoder(r.Body).Decode(&dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.ValidationService.ValidateDishDataForDeletion(dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.DishDataService.DeleteDishData(username, dishData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Dish deleted!\n"))
+	h.displayDishPage(w, username)
+}
+
+func (h *DishHandler) decodeAndValidateDish(r *http.Request) (models.DishData, error) {
+	var dishData models.DishData
+	err := json.NewDecoder(r.Body).Decode(&dishData)
+	if err != nil {
+		return dishData, err
+	}
+
+	err = h.ValidationService.ValidateDishData(dishData)
+	if err != nil {
+		log.Println(err)
+		return dishData, err
+	}
+
+	return dishData, nil
+}
+
+func (h *DishHandler) displayDishPage(w http.ResponseWriter, username string) {
+	dishData, err := h.DishDataService.GetDishData(username)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	utils.DisplayPage(w, dishData, "web/template/dish.html")
+}
+
+func (h *DishHandler) handleError(w http.ResponseWriter, err error, statusCode int) {
+	log.Println(err)
+	http.Error(w, err.Error(), statusCode)
 }

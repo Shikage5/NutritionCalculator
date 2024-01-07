@@ -18,6 +18,10 @@ type DefaultAuthService struct {
 
 var ErrInvalidCredentials = errors.New("invalid credentials")
 
+func NewAuthService(filePath string) *DefaultAuthService {
+	return &DefaultAuthService{FilePath: filePath}
+}
+
 func (a DefaultAuthService) Auth(inputUser models.UserRequest) (bool, error) {
 	userList, err := utils.ReadUserCredFromJSONFile(a.FilePath)
 	if err != nil {

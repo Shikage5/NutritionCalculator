@@ -5,144 +5,148 @@ import (
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
+	"NutritionCalculator/utils"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
 )
 
-func MealHandler(userDataPath string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type MealHandler struct {
+	MealService       userData.DefaultMealService
+	ValidationService validation.DefaultValidationService
+}
 
-		//Get user data based on username from context
-		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username, userDataPath)
+func NewMealHandler(mealService userData.DefaultMealService, validationService validation.DefaultValidationService) *MealHandler {
+	return &MealHandler{MealService: mealService, ValidationService: validationService}
+}
 
-		/*==========================GET=============================*/
-		if r.Method == http.MethodGet {
+func (h *MealHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(contextkeys.UserKey).(string)
 
-			//Get the user's data
-			meals, err := userDataService.GetMeals()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+	switch r.Method {
+	case http.MethodGet:
+		h.handleGet(w, username)
+	case http.MethodPost:
+		h.handlePost(w, r, username)
+	case http.MethodPut:
+		h.handlePut(w, r, username)
+	case http.MethodDelete:
+		h.handleDelete(w, r, username)
+	default:
+		h.handleError(w, errors.New("invalid method"), http.StatusMethodNotAllowed)
+	}
+}
 
-			DisplayPage(w, meals, "web/template/meals.html")
-			return
+func (h *MealHandler) handleGet(w http.ResponseWriter, username string) {
+	h.displayMealPage(w, username)
+}
 
-			/*==========================POST=============================*/
-		} else if r.Method == http.MethodPost {
-
-			//Get the meal data from the request body
-			var meal models.Meal
-			err := json.NewDecoder(r.Body).Decode(&meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateMeal(meal)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Calculate the meal's nutrition
-			nutritionalValues, err := userDataService.CalculateMealNutritionalValues(meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			meal.NutritionalValues = &nutritionalValues
-			//Add the meal to the user's data
-			err = userDataService.AddMeal(meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Meal added!\n"))
-
-			DisplayPage(w, meal, "web/template/meals.html")
-			return
-
-			/*==========================PUT=============================*/
-		} else if r.Method == http.MethodPut {
-
-			//Get the meal from the request body
-			var meal models.Meal
-			err := json.NewDecoder(r.Body).Decode(&meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateMeal(meal)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//calculate the meal's nutrition
-			nutritionalValues, err := userDataService.CalculateMealNutritionalValues(meal)
-			if err != nil {
-				if strings.Contains(err.Error(), "circular reference") {
-					http.Error(w, "Invalid input: "+err.Error(), http.StatusBadRequest)
-				} else {
-					http.Error(w, err.Error(), http.StatusInternalServerError)
-				}
-				return
-			}
-			meal.NutritionalValues = &nutritionalValues
-
-			//Update the meal in the user's data
-			err = userDataService.UpdateMeal(meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			//Display a message saying the meal was updated
-			w.Write([]byte("Meal updated!\n"))
-
-			DisplayPage(w, meal, "web/template/meals.html")
-
-			return
-
-			/*==========================DELETE=============================*/
-		} else if r.Method == http.MethodDelete {
-
-			//Get the meal from the request body
-			var meal models.Meal
-			err := json.NewDecoder(r.Body).Decode(&meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			validationService := &validation.DefaultValidationService{}
-			err = validationService.ValidateMealForDeletion(meal)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Delete the meal from the user's data
-			err = userDataService.DeleteMeal(meal)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Meal deleted!\n"))
-
-			DisplayPage(w, meal, "web/template/meals.html")
-
-			return
-		}
-
+func (h *MealHandler) handlePost(w http.ResponseWriter, r *http.Request, username string) {
+	var meal models.Meal
+	err := h.decodeAndValidate(r, &meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
 	}
 
+	nutritionalValues, err := h.MealService.CalculateMealNutritionalValues(meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	meal.NutritionalValues = &nutritionalValues
+	err = h.MealService.AddMeal(username, meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Meal added!\n"))
+	h.displayMealPage(w, username)
+}
+
+func (h *MealHandler) handlePut(w http.ResponseWriter, r *http.Request, username string) {
+	var meal models.Meal
+	err := h.decodeAndValidate(r, &meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	nutritionalValues, err := h.MealService.CalculateMealNutritionalValues(meal)
+	if err != nil {
+		if strings.Contains(err.Error(), "circular reference") {
+			h.handleError(w, err, http.StatusBadRequest)
+		} else {
+			h.handleError(w, err, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	meal.NutritionalValues = &nutritionalValues
+	err = h.MealService.UpdateMeal(username, meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Meal updated!\n"))
+	h.displayMealPage(w, username)
+}
+
+func (h *MealHandler) handleDelete(w http.ResponseWriter, r *http.Request, username string) {
+	var meal models.Meal
+	err := json.NewDecoder(r.Body).Decode(&meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.ValidationService.ValidateMealForDeletion(meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.MealService.DeleteMeal(username, meal)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Meal deleted!\n"))
+	h.displayMealPage(w, username)
+}
+
+func (h *MealHandler) handleError(w http.ResponseWriter, err error, statusCode int) {
+	log.Println(err)
+	http.Error(w, err.Error(), statusCode)
+}
+
+func (h *MealHandler) decodeAndValidate(r *http.Request, meal *models.Meal) error {
+	err := json.NewDecoder(r.Body).Decode(meal)
+	if err != nil {
+		return fmt.Errorf("failed to decode meal: %w", err)
+	}
+
+	err = h.ValidationService.ValidateMeal(*meal)
+	if err != nil {
+		return fmt.Errorf("invalid meal: %w", err)
+	}
+
+	return nil
+}
+
+func (h *MealHandler) displayMealPage(w http.ResponseWriter, username string) {
+	meals, err := h.MealService.GetMeals(username)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	utils.DisplayPage(w, meals, "web/template/meal.html")
 }

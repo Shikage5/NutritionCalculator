@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func SessionMiddleware(sessionService session.SessionService, next http.HandlerFunc) http.HandlerFunc {
+func SessionMiddleware(sessionService session.SessionService, next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Get the session ID from the cookie
 		cookie, err := r.Cookie("session_id")

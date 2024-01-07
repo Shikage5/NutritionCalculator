@@ -15,17 +15,22 @@ type RegistrationService interface {
 
 // DefaultRegistrationService is the default implementation of RegistrationService.
 type DefaultRegistrationService struct {
-	HashingService hashing.HashingService
-	FilePath       string
-	UserDataPath   string
+	HashingService      hashing.HashingService
+	CredentialsFilepath string
+	UserDataPath        string
+}
+
+// NewRegistrationService creates a new instance of DefaultRegistrationService.
+func NewRegistrationService(hashService hashing.HashingService, filePath string, userDataPath string) *DefaultRegistrationService {
+	return &DefaultRegistrationService{HashingService: hashService, CredentialsFilepath: filePath, UserDataPath: userDataPath}
 }
 
 // RegisterUser implements the registration logic.
 func (s *DefaultRegistrationService) RegisterUser(userRequest models.UserRequest) error {
 
 	// Check if the userCredentials.json file exists and create it if it doesn't
-	if _, err := os.Stat(s.FilePath); os.IsNotExist(err) {
-		file, err := os.Create(s.FilePath)
+	if _, err := os.Stat(s.CredentialsFilepath); os.IsNotExist(err) {
+		file, err := os.Create(s.CredentialsFilepath)
 		if err != nil {
 			return err
 		}
@@ -42,7 +47,7 @@ func (s *DefaultRegistrationService) RegisterUser(userRequest models.UserRequest
 		PasswordHash: hashedPassword,
 	}
 
-	if err := utils.WriteUserCredInJSONFile(user, s.FilePath); err != nil {
+	if err := utils.WriteUserCredInJSONFile(user, s.CredentialsFilepath); err != nil {
 		return err
 	}
 	// Create a new user data file

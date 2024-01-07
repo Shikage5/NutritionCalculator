@@ -5,120 +5,126 @@ import (
 	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/userData"
 	"NutritionCalculator/pkg/services/validation"
+	"NutritionCalculator/utils"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
 
-func FoodHandler(userDataPath string) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
+type FoodHandler struct {
+	FoodDataService   userData.DefaultFoodDataService
+	ValidationService validation.DefaultValidationService
+}
 
-		//Get user data based on username from context
+func NewFoodHandler(foodDataService userData.DefaultFoodDataService, validationService validation.DefaultValidationService) *FoodHandler {
+	return &FoodHandler{FoodDataService: foodDataService, ValidationService: validationService}
+}
 
-		username := r.Context().Value(contextkeys.UserKey).(string)
-		userDataService := userData.NewUserDataService(username, userDataPath)
-		/*==========================GET=============================*/
-		if r.Method == http.MethodGet {
+func (h *FoodHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	username := r.Context().Value(contextkeys.UserKey).(string)
 
-			//Get the user's data
-			foodData, err := userDataService.GetFoodData()
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
+	switch r.Method {
+	case http.MethodGet:
+		h.handleGet(w, username)
+	case http.MethodPost:
+		h.handlePost(w, r, username)
+	case http.MethodPut:
+		h.handlePut(w, r, username)
+	case http.MethodDelete:
+		h.handleDelete(w, r, username)
+	default:
+		h.handleError(w, errors.New("invalid method"), http.StatusMethodNotAllowed)
+	}
+}
 
-			DisplayPage(w, foodData, "web/template/foodData.html")
+func (h *FoodHandler) handleGet(w http.ResponseWriter, username string) {
+	h.displayFoodPage(w, username)
+}
 
-			return
-
-			/*==========================POST=============================*/
-		} else if r.Method == http.MethodPost {
-
-			//Get the food data from the request body
-			var foodData models.FoodData
-			err := json.NewDecoder(r.Body).Decode(&foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateFoodData(foodData)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Add the food to the user's data
-			err = userDataService.AddFoodData(foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Food added!\n"))
-			DisplayPage(w, foodData, "web/template/food.html")
-
-			/*==========================PUT=============================*/
-		} else if r.Method == http.MethodPut {
-
-			//Get the food from the request body
-			var foodData models.FoodData
-			err := json.NewDecoder(r.Body).Decode(&foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateFoodData(foodData)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Update the food in the user's data
-			err = userDataService.UpdateFoodData(foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			w.Write([]byte("Food updated!\n"))
-			DisplayPage(w, foodData, "web/template/food.html")
-
-			return
-
-			/*==========================DELETE=============================*/
-		} else if r.Method == http.MethodDelete {
-
-			//Get the food from the request body
-			var foodData models.FoodData
-			err := json.NewDecoder(r.Body).Decode(&foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err = valiationService.ValidateFoodDataForDeletion(foodData)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			//Delete the food from the user's data
-			err = userDataService.DeleteFoodData(foodData)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			//Display a message saying the food was deleted
-			w.Write([]byte("Food deleted!\n"))
-			DisplayPage(w, foodData, "web/template/food.html")
-		}
-
+func (h *FoodHandler) handlePost(w http.ResponseWriter, r *http.Request, username string) {
+	foodData, err := h.decodeAndValidateFood(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
 	}
 
+	err = h.FoodDataService.AddFoodData(username, foodData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Food added!\n"))
+	h.displayFoodPage(w, username)
+}
+
+func (h *FoodHandler) handlePut(w http.ResponseWriter, r *http.Request, username string) {
+	foodData, err := h.decodeAndValidateFood(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.FoodDataService.UpdateFoodData(username, foodData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Food updated!\n"))
+	h.displayFoodPage(w, username)
+}
+
+func (h *FoodHandler) handleDelete(w http.ResponseWriter, r *http.Request, username string) {
+	var foodData models.FoodData
+	err := json.NewDecoder(r.Body).Decode(&foodData)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.ValidationService.ValidateFoodDataForDeletion(foodData)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.FoodDataService.DeleteFoodData(username, foodData)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	w.Write([]byte("Food deleted!\n"))
+	h.displayFoodPage(w, username)
+}
+
+func (h *FoodHandler) decodeAndValidateFood(r *http.Request) (models.FoodData, error) {
+	var foodData models.FoodData
+	err := json.NewDecoder(r.Body).Decode(&foodData)
+	if err != nil {
+		return models.FoodData{}, err
+	}
+
+	err = h.ValidationService.ValidateFoodData(foodData)
+	if err != nil {
+		return models.FoodData{}, err
+	}
+	return foodData, nil
+}
+
+func (h *FoodHandler) displayFoodPage(w http.ResponseWriter, username string) {
+	foodData, err := h.FoodDataService.GetFoodData(username)
+	if err != nil {
+		h.handleError(w, err, http.StatusInternalServerError)
+		return
+	}
+
+	utils.DisplayPage(w, foodData, "web/template/food.html")
+}
+
+func (h *FoodHandler) handleError(w http.ResponseWriter, err error, statusCode int) {
+	log.Println(err)
+	http.Error(w, err.Error(), statusCode)
 }

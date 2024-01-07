@@ -6,69 +6,71 @@ import (
 	"NutritionCalculator/pkg/services/auth"
 	"NutritionCalculator/pkg/services/session"
 	"NutritionCalculator/pkg/services/validation"
-	"html/template"
+	"NutritionCalculator/utils"
 	"log"
 	"net/http"
 )
+
+type LoginHandler struct {
+	ValidationService validation.DefaultValidationService
+	SessionService    session.DefaultSessionService
+	AuthService       auth.DefaultAuthService
+}
+
+func NewLoginHandler(validationService validation.DefaultValidationService, sessionService session.DefaultSessionService, authService auth.DefaultAuthService) *LoginHandler {
+	return &LoginHandler{ValidationService: validationService, SessionService: sessionService, AuthService: authService}
+}
 
 type LoginTemplateData struct {
 	ErrMsg string
 }
 
-func LoginHandler(authService auth.AuthService, sessionService session.SessionService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		var data LoginTemplateData
-		if r.Method == http.MethodPost {
-			// Get the user request from the context
-			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(models.UserRequest)
-			if !ok {
-				http.Error(w, "invalid form data", http.StatusBadRequest)
-				return
-			}
-			valiationService := &validation.DefaultValidationService{}
-			err := valiationService.ValidateUserRequest(userRequest)
-			if err != nil {
-				log.Println(err)
-				http.Error(w, "Invalid User Input: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-
-			// Authenticate the user
-			authenticated, err := authService.Auth(userRequest)
-			if err == auth.ErrInvalidCredentials {
-				data.ErrMsg = err.Error()
-				DisplayPage(w, data, "web/template/login.html")
-				return
-			} else if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			} else if !authenticated {
-				data.ErrMsg = err.Error()
-				DisplayPage(w, data, "web/template/login.html")
-				return
-			}
-			// Create a session
-			err = sessionService.CreateSession(userRequest.Username, w)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-
-			http.Redirect(w, r, "/home", http.StatusSeeOther)
-			return
-		}
-
-		//Display the login page template
-		DisplayPage(w, data, "web/template/login.html")
-
+func (h *LoginHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	var data LoginTemplateData
+	if r.Method == http.MethodPost {
+		h.handlePost(w, r, &data)
+	} else {
+		utils.DisplayPage(w, data, "web/template/login.html")
 	}
 }
 
-func DisplayPage(w http.ResponseWriter, data any, templatePath string) {
-	tmpl, err := template.ParseFiles(templatePath)
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+func (h *LoginHandler) handlePost(w http.ResponseWriter, r *http.Request, data *LoginTemplateData) {
+	userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(models.UserRequest)
+	if !ok {
+		h.handleError(w, "invalid form data", http.StatusBadRequest)
 		return
 	}
-	tmpl.Execute(w, data)
+
+	err := h.ValidationService.ValidateUserRequest(userRequest)
+	if err != nil {
+		h.handleError(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	authenticated, err := h.AuthService.Auth(userRequest)
+	if err == auth.ErrInvalidCredentials {
+		data.ErrMsg = err.Error()
+		utils.DisplayPage(w, data, "web/template/login.html")
+		return
+	} else if err != nil {
+		h.handleError(w, err.Error(), http.StatusInternalServerError)
+		return
+	} else if !authenticated {
+		data.ErrMsg = "Authentication failed"
+		utils.DisplayPage(w, data, "web/template/login.html")
+		return
+	}
+
+	err = h.SessionService.CreateSession(userRequest.Username, w)
+	if err != nil {
+		h.handleError(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	http.Redirect(w, r, "/home", http.StatusSeeOther)
+}
+
+func (h *LoginHandler) handleError(w http.ResponseWriter, err string, statusCode int) {
+	log.Println(err)
+	http.Error(w, err, statusCode)
 }

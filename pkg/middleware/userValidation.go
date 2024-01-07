@@ -9,7 +9,7 @@ import (
 )
 
 // ValidateUser is a middleware that validates the username and password in the request body.
-func ValidateUser(validator validation.ValidationService, next http.HandlerFunc) http.HandlerFunc {
+func ValidateUser(validator validation.ValidationService, next http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
 			// Decode the request body into a UserRequest struct
@@ -35,10 +35,10 @@ func ValidateUser(validator validation.ValidationService, next http.HandlerFunc)
 			r = r.WithContext(ctx)
 
 			// Pass the new request to the next handler
-			next(w, r)
+			next.ServeHTTP(w, r)
 		} else {
 			// If the request method is not POST, pass it to the next handler
-			next(w, r)
+			next.ServeHTTP(w, r)
 		}
 	}
 }

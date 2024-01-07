@@ -7,6 +7,15 @@ import (
 	"os"
 )
 
+type JSONFileOperations interface {
+	ReadUserCredFromJSONFile(filename string) ([]models.UserCredentials, error)
+	WriteUserCredInJSONFile(newUser models.UserCredentials, filename string) error
+	ReadUserDataFromJSONFile(u *models.UserData, userDataPath string) error
+	WriteUserDataToJSONFile(u *models.UserData, userDataPath string) error
+}
+
+type DefaultJSONFileOperations struct{}
+
 // ==================== UserCredentials data operations ====================
 func ReadUserCredFromJSONFile(filename string) ([]models.UserCredentials, error) {
 	data, err := os.ReadFile(filename)

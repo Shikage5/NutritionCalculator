@@ -5,20 +5,41 @@ import (
 	"errors"
 )
 
+type FoodDataService interface {
+	AddFoodData(username string, meal models.FoodData) error
+	GetFoodData(username string) ([]models.FoodData, error)
+	UpdateFoodData(username string, meal models.FoodData) error
+	DeleteFoodData(username string, meal models.FoodData) error
+	GetFoodDataByName(string, string) (models.FoodData, error)
+	RecalculateNutritionalValuesOfFoods(string, models.UserData) (models.UserData, error)
+}
+
+type DefaultFoodDataService struct {
+	FoodService     FoodService
+	DishDataService DishDataService
+	MealService     MealService
+	DayService      DayService
+	UserDataService UserDataService
+}
+
 var ErrFoodAlreadyExists = errors.New("food already exists")
 var ErrFoodNotFound = errors.New("food not found")
 
+func NewFoodDataService(foodService FoodService, dishDataService DishDataService, mealService MealService, dayService DayService, userDataService UserDataService) *DefaultFoodDataService {
+	return &DefaultFoodDataService{FoodService: foodService, DishDataService: dishDataService, MealService: mealService, DayService: dayService, UserDataService: userDataService}
+}
+
 /*==========================CRUD=============================*/
-func (s *DefaultUserDataService) GetFoodData() ([]models.FoodData, error) {
-	savedData, err := s.GetUserData()
+func (s *DefaultFoodDataService) GetFoodData(username string) ([]models.FoodData, error) {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return nil, err
 	}
 	return savedData.FoodData, nil
 }
 
-func (s *DefaultUserDataService) AddFoodData(foodData models.FoodData) error {
-	savedData, err := s.GetUserData()
+func (s *DefaultFoodDataService) AddFoodData(username string, foodData models.FoodData) error {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return err
 	}
@@ -28,11 +49,11 @@ func (s *DefaultUserDataService) AddFoodData(foodData models.FoodData) error {
 		}
 	}
 	savedData.FoodData = append(savedData.FoodData, foodData)
-	return s.SaveUserData(savedData)
+	return s.UserDataService.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) UpdateFoodData(newFoodData models.FoodData) error {
-	savedData, err := s.GetUserData()
+func (s *DefaultFoodDataService) UpdateFoodData(username string, newFoodData models.FoodData) error {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return err
 	}
@@ -46,34 +67,34 @@ func (s *DefaultUserDataService) UpdateFoodData(newFoodData models.FoodData) err
 		}
 	}
 	//save the updated FoodData
-	err = s.SaveUserData(savedData)
+	err = s.UserDataService.SaveUserData(savedData)
 	if err != nil {
 		return err
 	}
 
 	// Recalculate the nutritional values of all food items, dishes and meals
-	savedData, err = s.recalculateNutritionalValuesOfFoods(newFoodData.Name, savedData)
+	savedData, err = s.RecalculateNutritionalValuesOfFoods(newFoodData.Name, savedData)
 	if err != nil {
 		return err
 	}
-	savedData.DishData, err = s.recalculateNutritionalValuesOfDishes(savedData.DishData)
+	savedData.DishData, err = s.DishDataService.RecalculateNutritionalValuesOfDishes(savedData.DishData)
 	if err != nil {
 		return err
 	}
-	savedData.Meals, err = s.recalculateNutritionalValuesOfMeals(savedData.Meals)
+	savedData.Meals, err = s.MealService.RecalculateNutritionalValuesOfMeals(savedData.Meals)
 	if err != nil {
 		return err
 	}
-	savedData.Days, err = s.recalculateNutritionalValuesOfDays(savedData.Days)
+	savedData.Days, err = s.DayService.RecalculateNutritionalValuesOfDays(savedData.Days)
 	if err != nil {
 		return err
 	}
 
-	return s.SaveUserData(savedData)
+	return s.UserDataService.SaveUserData(savedData)
 }
 
-func (s *DefaultUserDataService) DeleteFoodData(foodData models.FoodData) error {
-	savedData, err := s.GetUserData()
+func (s *DefaultFoodDataService) DeleteFoodData(username string, foodData models.FoodData) error {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return err
 	}
@@ -86,11 +107,11 @@ func (s *DefaultUserDataService) DeleteFoodData(foodData models.FoodData) error 
 			savedData.Meals = s.deleteFoodFromMeals(foodData.Name, savedData.Meals)
 
 			// Recalculate the nutritional values of all dishes and meals
-			savedData.DishData, err = s.recalculateNutritionalValuesOfDishes(savedData.DishData)
+			savedData.DishData, err = s.DishDataService.RecalculateNutritionalValuesOfDishes(savedData.DishData)
 			if err != nil {
 				return err
 			}
-			savedData.Meals, err = s.recalculateNutritionalValuesOfMeals(savedData.Meals)
+			savedData.Meals, err = s.MealService.RecalculateNutritionalValuesOfMeals(savedData.Meals)
 			if err != nil {
 				return err
 			}
@@ -100,11 +121,11 @@ func (s *DefaultUserDataService) DeleteFoodData(foodData models.FoodData) error 
 			return ErrFoodNotFound
 		}
 	}
-	return s.SaveUserData(savedData)
+	return s.UserDataService.SaveUserData(savedData)
 }
 
 /*==========================Delete Helper Functions=============================*/
-func (s *DefaultUserDataService) deleteFoodFromDishes(foodName string, dishes []models.DishData) []models.DishData {
+func (s *DefaultFoodDataService) deleteFoodFromDishes(foodName string, dishes []models.DishData) []models.DishData {
 	for i, dish := range dishes {
 		for j, food := range dish.Foods {
 			if food.Name == foodName {
@@ -116,7 +137,7 @@ func (s *DefaultUserDataService) deleteFoodFromDishes(foodName string, dishes []
 	return dishes
 }
 
-func (s *DefaultUserDataService) deleteFoodFromMeals(foodName string, meals []models.Meal) []models.Meal {
+func (s *DefaultFoodDataService) deleteFoodFromMeals(foodName string, meals []models.Meal) []models.Meal {
 	for i, meal := range meals {
 		for j, food := range meal.Foods {
 			if food.Name == foodName {
@@ -129,11 +150,11 @@ func (s *DefaultUserDataService) deleteFoodFromMeals(foodName string, meals []mo
 }
 
 /*==========================Recalculate Helper Functions=============================*/
-func (s *DefaultUserDataService) recalculateNutritionalValuesOfFoods(foodName string, savedData models.UserData) (models.UserData, error) {
+func (s *DefaultFoodDataService) RecalculateNutritionalValuesOfFoods(foodName string, savedData models.UserData) (models.UserData, error) {
 	for i, dish := range savedData.DishData {
 		for j, food := range dish.Foods {
 			if food.Name == foodName {
-				foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
+				foodNutritionalValues, err := s.FoodService.CalculateFoodNutritionalValues(savedData.Username, food)
 				if err != nil {
 					return models.UserData{}, err
 				}
@@ -145,7 +166,7 @@ func (s *DefaultUserDataService) recalculateNutritionalValuesOfFoods(foodName st
 	for i, meal := range savedData.Meals {
 		for j, food := range meal.Foods {
 			if food.Name == foodName {
-				foodNutritionalValues, err := s.CalculateFoodNutritionalValues(food)
+				foodNutritionalValues, err := s.FoodService.CalculateFoodNutritionalValues(savedData.Username, food)
 				if err != nil {
 					return models.UserData{}, err
 				}
@@ -158,8 +179,8 @@ func (s *DefaultUserDataService) recalculateNutritionalValuesOfFoods(foodName st
 }
 
 /*==========================Specific FoodData OP=============================*/
-func (s *DefaultUserDataService) GetFoodDataByName(foodName string) (models.FoodData, error) {
-	savedData, err := s.GetUserData()
+func (s *DefaultFoodDataService) GetFoodDataByName(username string, foodName string) (models.FoodData, error) {
+	savedData, err := s.UserDataService.GetUserData(username)
 	if err != nil {
 		return models.FoodData{}, err
 	}

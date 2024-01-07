@@ -53,9 +53,9 @@ func TestRegisterUser(t *testing.T) {
 			mockHashingService := &MockHashingService{shouldFail: tC.mockHashingServiceShouldFail}
 
 			registrationService := &DefaultRegistrationService{
-				HashingService: mockHashingService,
-				FilePath:       tempFile.Name(),
-				UserDataPath:   tempDir + "/",
+				HashingService:      mockHashingService,
+				CredentialsFilepath: tempFile.Name(),
+				UserDataPath:        tempDir + "/",
 			}
 			userRequest := models.UserRequest{
 				Username: tC.username,

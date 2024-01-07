@@ -2,8 +2,20 @@ package userData
 
 import "NutritionCalculator/data/models"
 
+type NutritionValuesService interface {
+	AddNutritionsByRatio(ratio float64, nutritionalValues models.NutritionalValues) models.NutritionalValues
+	AddNutritions(n1, n2 models.NutritionalValues) models.NutritionalValues
+}
+
+type DefaultNutritionValuesService struct {
+}
+
+func NewNutritionValuesService() *DefaultNutritionValuesService {
+	return &DefaultNutritionValuesService{}
+}
+
 // AddNutritionsByRatio adds two nutritional values by ratio
-func (s *DefaultUserDataService) AddNutritionsByRatio(ratio float64, nutritionalValues models.NutritionalValues) models.NutritionalValues {
+func (s *DefaultNutritionValuesService) AddNutritionsByRatio(ratio float64, nutritionalValues models.NutritionalValues) models.NutritionalValues {
 	var result models.NutritionalValues
 	result.Carbohydrates = nutritionalValues.Carbohydrates * ratio
 	result.Energy = nutritionalValues.Energy * ratio
@@ -18,7 +30,7 @@ func (s *DefaultUserDataService) AddNutritionsByRatio(ratio float64, nutritional
 }
 
 // AddNutritions adds two nutritional values
-func (s *DefaultUserDataService) AddNutritions(n1, n2 models.NutritionalValues) models.NutritionalValues {
+func (s *DefaultNutritionValuesService) AddNutritions(n1, n2 models.NutritionalValues) models.NutritionalValues {
 	var result models.NutritionalValues
 	result.Carbohydrates = n1.Carbohydrates + n2.Carbohydrates
 	result.Energy = n1.Energy + n2.Energy

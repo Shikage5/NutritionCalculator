@@ -2,52 +2,72 @@ package handlers
 
 import (
 	"NutritionCalculator/data/models"
-	contextkeys "NutritionCalculator/pkg/contextKeys"
 	"NutritionCalculator/pkg/services/registration"
 	"NutritionCalculator/pkg/services/validation"
+	"NutritionCalculator/utils"
+	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
 )
 
-func RegisterHandler(registrationService registration.RegistrationService) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == http.MethodPost {
-			userRequest, ok := r.Context().Value(contextkeys.UserRequestKey).(models.UserRequest)
-			if !ok {
-				http.Error(w, "Registration failed", http.StatusBadRequest)
-				return
-			}
+type RegisterHandler struct {
+	RegistrationService registration.RegistrationService
+}
 
-			//validate userRequest
+func NewRegisterHandler(registrationService registration.RegistrationService) *RegisterHandler {
+	return &RegisterHandler{RegistrationService: registrationService}
+}
 
-			validationService := &validation.DefaultValidationService{}
-			err := validationService.ValidateUserRequest(userRequest)
-			if err != nil {
-				log.Println(err)
-				data := PageData{
-					error: err.Error(),
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				DisplayPage(w, data, "web/template/register.html")
-				return
-			}
-
-			err = registrationService.RegisterUser(userRequest)
-			if err != nil {
-				log.Println(err)
-				data := PageData{
-					error: err.Error(),
-				}
-				w.WriteHeader(http.StatusBadRequest)
-				DisplayPage(w, data, "web/template/register.html")
-				return
-			}
-
-			w.WriteHeader(http.StatusCreated)
-			w.Write([]byte("Registration successful form"))
-			return
-		}
-
-		DisplayPage(w, nil, "web/template/register.html")
+func (h *RegisterHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	switch r.Method {
+	case http.MethodGet:
+		h.handleGet(w)
+	case http.MethodPost:
+		h.handlePost(w, r)
+	default:
+		h.handleError(w, errors.New("invalid method"), http.StatusMethodNotAllowed)
 	}
+}
+
+func (h *RegisterHandler) handleGet(w http.ResponseWriter) {
+	utils.DisplayPage(w, nil, "web/template/register.html")
+}
+
+func (h *RegisterHandler) handlePost(w http.ResponseWriter, r *http.Request) {
+	userRequest, err := h.decodeAndValidateUserRequest(r)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	err = h.RegistrationService.RegisterUser(userRequest)
+	if err != nil {
+		h.handleError(w, err, http.StatusBadRequest)
+		return
+	}
+
+	log.Println("User registered successfully!")
+	utils.DisplayPage(w, nil, "web/template/register.html")
+}
+
+func (h *RegisterHandler) decodeAndValidateUserRequest(r *http.Request) (models.UserRequest, error) {
+	var userRequest models.UserRequest
+	err := json.NewDecoder(r.Body).Decode(&userRequest)
+	if err != nil {
+		return models.UserRequest{}, err
+	}
+
+	validationService := &validation.DefaultValidationService{}
+	err = validationService.ValidateUserRequest(userRequest)
+	if err != nil {
+		return models.UserRequest{}, err
+	}
+
+	return userRequest, nil
+}
+
+func (h *RegisterHandler) handleError(w http.ResponseWriter, err error, statusCode int) {
+	log.Println(err)
+	http.Error(w, err.Error(), statusCode)
 }

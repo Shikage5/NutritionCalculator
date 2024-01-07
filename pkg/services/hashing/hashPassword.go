@@ -8,6 +8,10 @@ type HashingService interface {
 
 type DefaultHashingService struct{}
 
+func NewHashingService() *DefaultHashingService {
+	return &DefaultHashingService{}
+}
+
 func (h *DefaultHashingService) HashPassword(password string) (string, error) {
 	// Implement hashing logic using a secure algorithm (e.g., bcrypt)
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)

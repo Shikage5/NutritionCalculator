@@ -19,6 +19,11 @@ type DefaultSessionService struct {
 	SessionMap map[string]string
 }
 
+// NewSessionService creates a new instance of InMemorySessionService.
+func NewSessionService() *DefaultSessionService {
+	return &DefaultSessionService{SessionMap: make(map[string]string)}
+}
+
 func (m *DefaultSessionService) CreateSession(username string, w http.ResponseWriter) error {
 	// Generate a new session ID
 	sessionID, err := m.GenerateSessionID()
